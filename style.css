@@ -16,7 +16,7 @@ body {
 
   /* Imagen del logo */
   .logo {
-    max-width: 150px; /* Limita el ancho máximo de la imagen */
+    max-width: 100px; /* Limita el ancho máximo de la imagen */
     height: auto; /* Mantiene la proporción */
     margin-bottom: 1rem; /* Espacio debajo de la imagen */
   }

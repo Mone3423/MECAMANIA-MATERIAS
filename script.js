@@ -48,7 +48,7 @@ const planes = {
           { id: 25, nombre: "Lab. Circuitos Eléctricos I", prerequisitos: [12,13,15] },
           { id: 26, nombre: "Mecánica de Fluidos", prerequisitos: [6,7,12,13] },
           { id: 27, nombre: "Lab. Mecánica de Fluidos", prerequisitos: [6,7,12,13] },
-          { id: 28, nombre: "Transmisión de Calor" , prerequisitos: []},
+          { id: 28, nombre: "Transmisión de Calor" , prerequisitos: [18]},
           { id: 29, nombre: "Procesos de Manufactura I", prerequisitos: [19,20,21] },
           { id: 30, nombre: "Taller de Procesos de Manufactura I", prerequisitos: [19,20,21] },
           { id: 31, nombre: "Mecanismos", prerequisitos: [21] },
