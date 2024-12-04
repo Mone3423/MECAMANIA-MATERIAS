@@ -106,11 +106,11 @@ const planes = {
           { id: 61, nombre: "Diseño de Sistema de Control", prerequisitos: [32,33] },
           { id: 62, nombre: "Lab. Diseño de Sistema de Control", prerequisitos: [32,33] },
           { id: 63, nombre: "Energías Alternativas", prerequisitos: [52,53] },
-          { id: 64, nombre: "Trabajo de Titulación", prerequisitos: [] },
-        
           { id: 66, nombre: "Máquinas de Elevación y Transporte", prerequisitos: [57,58] },
           { id: 67, nombre: "Ingeniería Automotriz", prerequisitos: [60] },
           { id: 68, nombre: "Taller de Ingeniería Automotriz", prerequisitos: [60] },
+          { id: 64, nombre: "Trabajo de Titulación", prerequisitos: [61,62,63,66,67,68] },
+        
         ],
       },
 
