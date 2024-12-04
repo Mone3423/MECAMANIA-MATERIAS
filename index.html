@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,66 +8,106 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-  
+
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="WhatsApp_Image_2024-11-28_at_5.36.45_PM-removebg-preview.png" type="image/x-icon">
 </head>
+
 <body>
-  <header class="bg-success text-white text-center py-4">
-    <section>
-      <img src="Logo.png" alt="Logo de la página" class="logo"></section>
-    <h1>Consulta de Materias</h1>
-    <p>Selecciona tu carrera y las materias que ya aprobaste para saber cuáles puedes cursar.</p>
-  </header>
-  
   <main class="container my-4">
-    <!-- Selector de carrera -->
-    <section id="seleccion-carrera" class="mb-4">
-      <h2>Selecciona tu carrera</h2>
-      <select id="carrera-select" class="form-select">
-        <option value="" disabled selected>Elige tu carrera</option>
-        <option value="mecanica">Ingeniería Mecánica</option>
-        <option value="electromecanica">Ingeniería Electromecánica</option>
-        <option value="mecatronica">Ingeniería Mecatrónica</option>
-        <option value="automotriz">Ingeniería Automotriz</option>
-      </select>
-    </section>
+    <header class="bg-success text-white text-center py-4">
+      <section>
+        <img src="Logo.png" alt="Logo de la página" class="logo">
+      </section>
+      <h1>Consulta de Materias</h1>
+      <p>Selecciona tu carrera y las materias que ya aprobaste para saber cuáles puedes cursar.</p>
+    </header>
 
-    <!-- Materias aprobadas y disponibles -->
-    <section id="materias-aprobadas" style="display: none;">
-      <h2>Materias Aprobadas</h2>
-      <div class="accordion" id="accordionSemestres">
-        <!-- Los semestres se generarán dinámicamente -->
-      </div>
-      <button id="check-available" class="btn btn-primary mt-3">Ver Materias Disponibles</button>
-    </section>
+    <main class="container my-4">
+      <!-- Selector de carrera -->
+      <section id="seleccion-carrera" class="mb-4">
+        <h2>Selecciona tu carrera</h2>
+        <select id="carrera-select" class="form-select">
+          <option value="" disabled selected>Elige tu carrera</option>
+          <option value="mecanica">Ingeniería Mecánica</option>
+          <option value="electromecanica">Ingeniería Electromecánica</option>
+          <option value="mecatronica">Ingeniería Mecatrónica</option>
+          <option value="automotriz">Ingeniería Automotriz</option>
+        </select>
+      </section>
 
-    <section id="materias-disponibles" style="display: none;" class="mt-4">
-       
-      <h2>Materias Disponibles</h2>
-      <ul id="available-list" class="list-group"></ul>
+      <!-- Materias aprobadas y disponibles -->
+      <section id="materias-aprobadas" style="display: none;">
+        <h2>Materias Aprobadas</h2>
+        <div class="accordion" id="accordionSemestres">
+          <!-- Los semestres se generarán dinámicamente -->
+        </div>
+        <button id="check-available" class="btn btn-primary mt-3">Ver Materias Disponibles</button>
+      </section>
+
+      <section id="materias-disponibles" style="display: none;" class="mt-4">
+
+        <h2>Materias Disponibles</h2>
+        <ul id="available-list" class="list-group"></ul>
+      </section>
+    </main>
+    <!-- Sección de Consejos Útiles -->
+    <section id="consejos-utiles" class="mt-5">
+      <h2 class="text-center">Consejos Útiles</h2>
+      <div class="card-deck">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-journal-check"></i> Tip 0</h5>
+            <p class="card-text">
+            <p class="card-text">Puedes tomar las materias <strong>Humanística I, II, III</strong> e <strong>Ingeniería
+                de Mantenimiento</strong> cuando lo creas necesario. Los créditos son solo una formalidad, ¡planifica a
+              tu ritmo!</p>
+            </p>
+          </div>
+        </div>
+        <div class="card-deck">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-lightbulb"></i> Tip 1</h5>
+              <p class="card-text">Asegúrate de revisar las correlativas antes de planificar tu ciclo.</p>
+            </div>
+          </div>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-calendar"></i> Tip 2</h5>
+              <p class="card-text">Revisa los horarios de materias para evitar choques al momento de inscribirte.</p>
+            </div>
+          </div>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-emoji-smile"></i> Tip 3</h5>
+              <p class="card-text">Consulta con estudiantes avanzados para obtener recomendaciones sobre profesores.</p>
+            </div>
+          </div>
+        </div>
     </section>
   </main>
-  
+
   <footer class="bg-dark text-center py-3">
     <p class="text-white">Desarrollado por MECA-MANIA para estudiantes con ❤️</p>
-      <!-- Footer -->
- 
+    <!-- Footer -->
+
     <p class="text-white">Síguenos en nuestras redes sociales</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="https://www.facebook.com/profile.php?id=61568621474059" target="_blank" class="text-white fs-4">
-              <i class="bi bi-facebook"></i>
-            </a>
-            <a href="https://www.tiktok.com/@meca.mania?_t=8rZyOw1Hk51&_r=1" target="_blank" class="text-white fs-4">
-              <i class="bi bi-tiktok"></i>
-            </a>
-            
-          </div>
-    
+    <div class="d-flex justify-content-center gap-3">
+      <a href="https://www.facebook.com/profile.php?id=61568621474059" target="_blank" class="text-white fs-4">
+        <i class="bi bi-facebook"></i>
+      </a>
+      <a href="https://www.tiktok.com/@meca.mania?_t=8rZyOw1Hk51&_r=1" target="_blank" class="text-white fs-4">
+        <i class="bi bi-tiktok"></i>
+      </a>
+
+    </div>
+
     <p class="text-white">&copy; 2024 MECA-MANIA. Todos los derechos reservados.</p>
   </footer>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>
