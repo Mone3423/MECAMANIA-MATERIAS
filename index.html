@@ -14,43 +14,43 @@
 </head>
 
 <body>
+
+  <header class="bg-success text-white text-center py-4">
+    <section>
+      <img src="Logo.png" alt="Logo de la página" class="logo">
+    </section>
+    <h1>Consulta de Materias</h1>
+    <p>Selecciona tu carrera y las materias que ya aprobaste para saber cuáles puedes cursar.</p>
+  </header>
+
   <main class="container my-4">
-    <header class="bg-success text-white text-center py-4">
-      <section>
-        <img src="Logo.png" alt="Logo de la página" class="logo">
-      </section>
-      <h1>Consulta de Materias</h1>
-      <p>Selecciona tu carrera y las materias que ya aprobaste para saber cuáles puedes cursar.</p>
-    </header>
+    <!-- Selector de carrera -->
+    <section id="seleccion-carrera" class="mb-4">
+      <h2>Selecciona tu carrera</h2>
+      <select id="carrera-select" class="form-select">
+        <option value="" disabled selected>Elige tu carrera</option>
+        <option value="mecanica">Ingeniería Mecánica</option>
+        <option value="electromecanica">Ingeniería Electromecánica</option>
+        <option value="mecatronica">Ingeniería Mecatrónica</option>
+        <option value="automotriz">Ingeniería Automotriz</option>
+      </select>
+    </section>
 
-    <main class="container my-4">
-      <!-- Selector de carrera -->
-      <section id="seleccion-carrera" class="mb-4">
-        <h2>Selecciona tu carrera</h2>
-        <select id="carrera-select" class="form-select">
-          <option value="" disabled selected>Elige tu carrera</option>
-          <option value="mecanica">Ingeniería Mecánica</option>
-          <option value="electromecanica">Ingeniería Electromecánica</option>
-          <option value="mecatronica">Ingeniería Mecatrónica</option>
-          <option value="automotriz">Ingeniería Automotriz</option>
-        </select>
-      </section>
+    <!-- Materias aprobadas y disponibles -->
+    <section id="materias-aprobadas" style="display: none;">
+      <h2>Materias Aprobadas</h2>
+      <div class="accordion" id="accordionSemestres">
+        <!-- Los semestres se generarán dinámicamente -->
+      </div>
+      <button id="check-available" class="btn btn-primary mt-3">Ver Materias Disponibles</button>
+    </section>
 
-      <!-- Materias aprobadas y disponibles -->
-      <section id="materias-aprobadas" style="display: none;">
-        <h2>Materias Aprobadas</h2>
-        <div class="accordion" id="accordionSemestres">
-          <!-- Los semestres se generarán dinámicamente -->
-        </div>
-        <button id="check-available" class="btn btn-primary mt-3">Ver Materias Disponibles</button>
-      </section>
+    <section id="materias-disponibles" style="display: none;" class="mt-4">
 
-      <section id="materias-disponibles" style="display: none;" class="mt-4">
+      <h2>Materias Disponibles</h2>
+      <ul id="available-list" class="list-group"></ul>
+    </section>
 
-        <h2>Materias Disponibles</h2>
-        <ul id="available-list" class="list-group"></ul>
-      </section>
-    </main>
     <!-- Sección de Consejos Útiles -->
     <section id="consejos-utiles" class="mt-5">
       <h2 class="text-center">Consejos Útiles</h2>
