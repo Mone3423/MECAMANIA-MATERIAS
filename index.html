@@ -7,9 +7,83 @@
   <title>Consulta de Materias y Horarios</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
- 
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .logo {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .logo {
+        max-width: 100px;
+      }
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    section {
+      margin-bottom: 20px;
+    }
+
+    #checkbox-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      margin: 5px 0;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+    }
+
+    footer {
+      background-color: #c90505;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    footer .social-icons a {
+      color: white;
+      margin: 0 10px;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+
+    footer .social-icons a:hover {
+      color: #17a2b8;
+    }
+
     /* Estilos para el horario */
     .schedule-container {
       margin-top: 20px;
@@ -51,13 +125,36 @@
     .schedule-controls {
       margin-bottom: 15px;
     }
+
+    /* Estilos para el arrastre */
+    .draggable-course {
+      cursor: grab;
+      transition: all 0.2s;
+    }
+
+    .draggable-course:active {
+      cursor: grabbing;
+      opacity: 0.7;
+    }
+
+    .drop-hover {
+      background-color: #e8f5e9 !important;
+      border: 2px dashed #4caf50 !important;
+    }
+
+    .course-delete {
+      float: right;
+      cursor: pointer;
+      color: #dc3545;
+      font-weight: bold;
+      margin-left: 5px;
+    }
   </style>
 </head>
 
 <body>
 
   <header class="bg-success text-white text-center py-4">
-    
     <h1>Consulta de Materias y Horarios</h1>
     <p>Selecciona tu carrera, las materias aprobadas y organiza tu horario semanal.</p>
   </header>
@@ -85,6 +182,9 @@
 
     <section id="materias-disponibles" style="display: none;" class="mt-4">
       <h2>Materias Disponibles</h2>
+      <div class="alert alert-info">
+        Arrastra las materias a tu horario semanal
+      </div>
       <ul id="available-list" class="list-group"></ul>
     </section>
 
@@ -153,16 +253,353 @@
 
   <footer class="bg-dark text-center py-3">
     <p class="text-white">Desarrollado para estudiantes con ❤️</p>
-   
     <p class="text-white">&copy; 2024 /mone. Todos los derechos reservados.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Plan de estudios con materias organizadas por semestre
+    const planes = {
+      mecanica: {
+        semestres: [
+          {
+            semestre: "1º Semestre",
+            materias: [
+              { id: 1, nombre: "Cálculo I", prerequisitos: [] },
+              { id: 2, nombre: "Álgebra", prerequisitos: [] },
+              { id: 3, nombre: "Física Básica I", prerequisitos: [] },
+              { id: 4, nombre: "Lab. Física Básica I", prerequisitos: [] },
+              { id: 5, nombre: "Dibujo Mecánico", prerequisitos: [] },
+              { id: 6, nombre: "Química General", prerequisitos: [] },
+              { id: 7, nombre: "Lab. Química General", prerequisitos: [] },
+            ],
+          },
+          {
+            semestre: "2º Semestre",
+            materias: [
+              { id: 8, nombre: "Cálculo II", prerequisitos: [1] },
+              { id: 9, nombre: "Álgebra Lineal", prerequisitos: [1, 2] },
+              { id: 10, nombre: "Probabilidad y Estadística", prerequisitos: [1, 2] },
+              { id: 11, nombre: "Métodos Numéricos y Diseño Algorítmico I", prerequisitos: [1, 2] },
+              { id: 12, nombre: "Física Básica II", prerequisitos: [3, 4] },
+              { id: 13, nombre: "Lab. Física Básica II", prerequisitos: [3, 4] },
+              { id: 14, nombre: "Mecánica Técnica I", prerequisitos: [1, 3, 4, 5] },
+            ],
+          },
+          {
+            semestre: "3º Semestre",
+            materias: [
+              { id: 15, nombre: "Ecuaciones Diferenciales", prerequisitos: [8, 9, 10, 11] },
+              { id: 16, nombre: "Física Básica III", prerequisitos: [8, 12, 13] },
+              { id: 17, nombre: "Lab. Física Básica III", prerequisitos: [8, 12, 13] },
+              { id: 18, nombre: "Termodinámica", prerequisitos: [6, 7, 12, 13] },
+              { id: 19, nombre: "Ciencia de los Materiales", prerequisitos: [6, 7, 12, 13] },
+              { id: 20, nombre: "Lab. Ciencia de los Materiales", prerequisitos: [6, 7, 12, 13] },
+              { id: 21, nombre: "Mecánica Técnica II", prerequisitos: [14] },
+              { id: 22, nombre: "Mecánica de Materiales", prerequisitos: [14] },
+            ],
+          },
+          {
+            semestre: "4º Semestre",
+            materias: [
+              { id: 23, nombre: "Mecánica de Materiales Aplicadas", prerequisitos: [22] },
+              { id: 24, nombre: "Circuitos Eléctricos I", prerequisitos: [12, 13, 15] },
+              { id: 25, nombre: "Lab. Circuitos Eléctricos I", prerequisitos: [12, 13, 15] },
+              { id: 26, nombre: "Mecánica de Fluidos", prerequisitos: [6, 7, 12, 13] },
+              { id: 27, nombre: "Lab. Mecánica de Fluidos", prerequisitos: [6, 7, 12, 13] },
+              { id: 28, nombre: "Transmisión de Calor", prerequisitos: [18] },
+              { id: 29, nombre: "Procesos de Manufactura I", prerequisitos: [19, 20, 21] },
+              { id: 30, nombre: "Taller de Procesos de Manufactura I", prerequisitos: [19, 20, 21] },
+              { id: 31, nombre: "Mecanismos", prerequisitos: [21] },
+            ],
+          },
+          {
+            semestre: "5º Semestre",
+            materias: [
+              { id: 32, nombre: "Controles Automáticos", prerequisitos: [15] },
+              { id: 33, nombre: "Lab. Controles Automáticos", prerequisitos: [15] },
+              { id: 34, nombre: "Máquinas Eléctricas", prerequisitos: [24, 25] },
+              { id: 35, nombre: "Lab. Máquinas Eléctricas", prerequisitos: [24, 25] },
+              { id: 36, nombre: "Electrónica I", prerequisitos: [24, 25] },
+              { id: 37, nombre: "Lab. Electrónica I", prerequisitos: [24, 25] },
+              { id: 38, nombre: "Ingeniería Térmica", prerequisitos: [28] },
+              { id: 39, nombre: "Lab. Ingeniería Térmica", prerequisitos: [28] },
+              { id: 40, nombre: "Elementos de Máquinas I", prerequisitos: [23, 31] },
+              { id: 41, nombre: "Estructuras Metálicas", prerequisitos: [23] },
+            ],
+          },
+          {
+            semestre: "6º Semestre",
+            materias: [
+              { id: 42, nombre: "Instalaciones Eléctricas II", prerequisitos: [34, 35] },
+              { id: 43, nombre: "Lab. Instalaciones Eléctricas II", prerequisitos: [34, 35] },
+              { id: 44, nombre: "Máquinas Neumáticas", prerequisitos: [26, 27] },
+              { id: 45, nombre: "Taller Máquinas Neumáticas", prerequisitos: [26, 27] },
+              { id: 46, nombre: "Refrigeración y Aire Acondicionado", prerequisitos: [38, 39] },
+              { id: 47, nombre: "Lab. Refrigeración y Aire Acondicionado", prerequisitos: [38, 39] },
+              { id: 48, nombre: "Procesos de Manufactura II", prerequisitos: [29] },
+              { id: 49, nombre: "Taller de Manufactura II", prerequisitos: [30] },
+              { id: 50, nombre: "Elementos de Máquinas II", prerequisitos: [40, 41] },
+            ],
+          },
+          {
+            semestre: "7º Semestre",
+            materias: [
+              { id: 52, nombre: "Tecnología de Gas Natural", prerequisitos: [38, 39] },
+              { id: 53, nombre: "Taller Tecnología del Gas Natural", prerequisitos: [38, 39] },
+              { id: 54, nombre: "Máquinas Hidráulicas", prerequisitos: [44, 45] },
+              { id: 55, nombre: "Mecatrónica I", prerequisitos: [36, 37] },
+              { id: 56, nombre: "Lab. Mecatrónica I", prerequisitos: [36, 37] },
+              { id: 57, nombre: "Diseño Mecánico", prerequisitos: [48, 49, 50] },
+              { id: 58, nombre: "Taller de Diseño Mecánico", prerequisitos: [48, 49, 50] },
+            ],
+          },
+          {
+            semestre: "8º Semestre",
+            materias: [
+              { id: 61, nombre: "Diseño de Sistema de Control", prerequisitos: [32, 33] },
+              { id: 62, nombre: "Lab. Diseño de Sistema de Control", prerequisitos: [32, 33] },
+              { id: 63, nombre: "Energías Alternativas", prerequisitos: [52, 53] },
+              { id: 66, nombre: "Máquinas de Elevación y Transporte", prerequisitos: [57, 58] },
+              { id: 67, nombre: "Ingeniería Automotriz", prerequisitos: [60] },
+              { id: 68, nombre: "Taller de Ingeniería Automotriz", prerequisitos: [60] },
+              { id: 64, nombre: "Trabajo de Titulación", prerequisitos: [61, 62, 63, 66, 67, 68] },
+            ],
+          },
+        ],
+      },
+      electromecanica: {
+        semestres: [
+          {
+            semestre: "1º Semestre",
+            materias: [
+              { id: 1, nombre: "Cálculo I", prerequisitos: [] },
+              { id: 2, nombre: "Álgebra", prerequisitos: [] },
+              { id: 4, nombre: "Física Básica I", prerequisitos: [] },
+              { id: 5, nombre: "Laboratorio de Física Básica I", prerequisitos: [] },
+              { id: 6, nombre: "Química General", prerequisitos: [] },
+              { id: 7, nombre: "Laboratorio de Química General", prerequisitos: [] },
+              { id: 8, nombre: "Dibujo Mecánico", prerequisitos: [] },
+            ],
+          },
+          {
+            semestre: "2º Semestre",
+            materias: [
+              { id: 9, nombre: "Cálculo II", prerequisitos: [1] },
+              { id: 10, nombre: "Álgebra Lineal", prerequisitos: [2] },
+              { id: 11, nombre: "Probabilidad y Estadística", prerequisitos: [1, 2] },
+              { id: 12, nombre: "Métodos Numéricos y Diseño de Algoritmos I", prerequisitos: [1, 2] },
+              { id: 13, nombre: "Física Básica II", prerequisitos: [5, 6, 1] },
+              { id: 14, nombre: "Laboratorio de Física Básica II", prerequisitos: [5, 6, 1] },
+              { id: 15, nombre: "Mecánica Técnica I", prerequisitos: [5, 6, 8, 1] },
+            ],
+          },
+          {
+            semestre: "3º Semestre",
+            materias: [
+              { id: 18, nombre: "Ecuaciones diferenciales", prerequisitos: [9, 10, 11, 12] },
+              { id: 21, nombre: "Física Básica III", prerequisitos: [9, 13, 14] },
+              { id: 3, nombre: "Física Básica III", prerequisitos: [9, 13, 14] },
+              { id: 28, nombre: "Termodinámica", prerequisitos: [13, 14, 6, 7] },
+              { id: 16, nombre: "Ciencia de los Materiales", prerequisitos: [13, 14, 6, 7] },
+              { id: 17, nombre: "Laboratorio de Ciencia de los Materiales", prerequisitos: [13, 14, 6, 7] },
+              { id: 19, nombre: "Mecánica Técnica II", prerequisitos: [15] },
+              { id: 20, nombre: "Mecánica de Materiales", prerequisitos: [15] },
+            ],
+          },
+          {
+            semestre: "4º Semestre",
+            materias: [
+              { id: 22, nombre: "Circuitos Eléctricos I", prerequisitos: [21, 3, 18] },
+              { id: 23, nombre: "Laboratorio de Circuitos Eléctricos I", prerequisitos: [21, 3, 18] },
+              { id: 24, nombre: "Medidas Eléctricas", prerequisitos: [21, 3] },
+              { id: 25, nombre: "Laboratorio de Medidas Eléctricas", prerequisitos: [21, 3] },
+              { id: 26, nombre: "Mecánica de Fluidos", prerequisitos: [13, 14, 6, 7] },
+              { id: 27, nombre: "Laboratorio de Mecánica de Fluidos", prerequisitos: [13, 14, 6, 7] },
+              { id: 41, nombre: "Transmisión de Calor", prerequisitos: [28] },
+              { id: 29, nombre: "Procesos de Manufactura", prerequisitos: [16, 17, 19] },
+              { id: 30, nombre: "Taller de Manufactura", prerequisitos: [16, 17, 19] },
+              { id: 39, nombre: "Mecánica de materiales aplicada", prerequisitos: [20] },
+            ],
+          },
+          {
+            semestre: "5º Semestre",
+            materias: [
+              { id: 31, nombre: "Sistemas de Control", prerequisitos: [18] },
+              { id: 32, nombre: "Laboratorio de Sistemas de Control", prerequisitos: [18] },
+              { id: 33, nombre: "Circuitos Eléctricos II", prerequisitos: [22, 23, 24, 25] },
+              { id: 34, nombre: "Laboratorio de Circuitos Eléctricos II", prerequisitos: [22, 23, 24, 25] },
+              { id: 35, nombre: "Electrónica I", prerequisitos: [22, 23] },
+              { id: 36, nombre: "Lab. Electrónica I", prerequisitos: [22, 23] },
+              { id: 37, nombre: "Ingeniería Térmica", prerequisitos: [41] },
+              { id: 38, nombre: "Laboratorio de Ingeniería Térmica", prerequisitos: [41] },
+              { id: 40, nombre: "Elementos de Máquinas I", prerequisitos: [29, 30, 39] },
+            ],
+          },
+          {
+            semestre: "6º Semestre",
+            materias: [
+              { id: 43, nombre: "Máquinas de Corriente Alterna", prerequisitos: [34, 35] },
+              { id: 44, nombre: "Lab. Máquinas de Corriente Alterna", prerequisitos: [35, 34] },
+              { id: 46, nombre: "Máquinas Hidráulicas", prerequisitos: [26, 27] },
+              { id: 47, nombre: "Máquinas Neumáticas", prerequisitos: [26, 27] },
+              { id: 48, nombre: "Taller Máquinas Neumáticas", prerequisitos: [26, 27] },
+              { id: 49, nombre: "Mecatrónica", prerequisitos: [37, 38] },
+              { id: 50, nombre: "Lab. Mecatrónica", prerequisitos: [37, 38] },
+            ],
+          },
+          {
+            semestre: "7º Semestre",
+            materias: [
+              { id: 52, nombre: "Máquinas de Corriente Alterna II", prerequisitos: [44, 43] },
+              { id: 53, nombre: "Lab. Máquinas de Corriente Alterna II", prerequisitos: [44, 43] },
+              { id: 54, nombre: "Instalaciones Eléctricas II", prerequisitos: [44, 43] },
+              { id: 55, nombre: "Lab. Instalaciones Eléctricas II", prerequisitos: [44, 43] },
+              { id: 56, nombre: "Electrónica Industrial", prerequisitos: [49, 50] },
+              { id: 57, nombre: "Lab. Electrónica Industrial", prerequisitos: [49, 50] },
+              { id: 59, nombre: "Elementos de Máquinas II", prerequisitos: [40] },
+            ],
+          },
+          {
+            semestre: "8º Semestre",
+            materias: [
+              { id: 61, nombre: "Diseño de Sistema de Control", prerequisitos: [31, 32] },
+              { id: 62, nombre: "Lab. Diseño de Sistema de Control", prerequisitos: [54, 55] },
+              { id: 63, nombre: "Sistemas Eléctricos de Potencia", prerequisitos: [54, 55] },
+              { id: 64, nombre: "Lab. Sistemas Eléctricos de Potencia", prerequisitos: [54, 55] },
+              { id: 65, nombre: "Centrales Eléctricas I", prerequisitos: [52, 53, 46] },
+              { id: 66, nombre: "Lab. Centrales Eléctricas I", prerequisitos: [52, 53, 46] },
+              { id: 67, nombre: "Diseño Mecánico", prerequisitos: [59] },
+              { id: 68, nombre: "Taller de Diseño Mecánico", prerequisitos: [59] },
+              { id: 69, nombre: "TRABAJO DE TITULACIÓN", prerequisitos: [61, 62, 63, 64, 65, 66, 67, 68] },
+            ],
+          },
+        ],
+      },
+      mecatronica: {
+        semestres: [
+          {
+            semestre: "1º Semestre",
+            materias: [
+              { id: 1, nombre: "Cálculo I", prerequisitos: [] },
+              { id: 2, nombre: "Álgebra", prerequisitos: [] },
+              { id: 3, nombre: "Física Básica I", prerequisitos: [] },
+              { id: 4, nombre: "Laboratorio de Física Básica I", prerequisitos: [] },
+              { id: 5, nombre: "Química General", prerequisitos: [] },
+              { id: 6, nombre: "Laboratorio de Química General", prerequisitos: [] },
+              { id: 7, nombre: "Dibujo Técnico", prerequisitos: [] },
+            ],
+          },
+          {
+            semestre: "2º Semestre",
+            materias: [
+              { id: 8, nombre: "Cálculo II", prerequisitos: [1] },
+              { id: 9, nombre: "Álgebra Lineal", prerequisitos: [1, 2] },
+              { id: 10, nombre: "Probabilidad y Estadística", prerequisitos: [1, 2] },
+              { id: 11, nombre: "Métodos Numéricos y Diseño de Algoritmos", prerequisitos: [1, 2] },
+              { id: 12, nombre: "Física Básica II", prerequisitos: [3, 4] },
+              { id: 13, nombre: "Laboratorio de Física Básica II", prerequisitos: [3, 4] },
+              { id: 18, nombre: "Mecánica Técnica", prerequisitos: [3, 4, 7] },
+            ],
+          },
+          {
+            semestre: "3º Semestre",
+            materias: [
+              { id: 14, nombre: "Ecuaciones Diferenciales", prerequisitos: [8, 9, 10, 11] },
+              { id: 15, nombre: "Física Básica III", prerequisitos: [12, 13, 8] },
+              { id: 23, nombre: "Laboratorio de Física Básica III", prerequisitos: [12, 13, 8] },
+              { id: 16, nombre: "Termodinámica", prerequisitos: [12, 13, 5, 6] },
+              { id: 17, nombre: "Métodos Numéricos y Diseño de Algoritmos II", prerequisitos: [11] },
+              { id: 67, nombre: "Mecánica Técnica II", prerequisitos: [18] },
+              { id: 19, nombre: "Mecánica de Materiales", prerequisitos: [18] },
+            ],
+          },
+          {
+            semestre: "4º Semestre",
+            materias: [
+              { id: 20, nombre: "Circuitos Eléctricos I", prerequisitos: [14, 15, 23] },
+              { id: 21, nombre: "Laboratorio de Circuitos Eléctricos I", prerequisitos: [14, 15, 23] },
+              { id: 22, nombre: "Métodos Numéricos y Diseño de Algoritmos III", prerequisitos: [17] },
+              { id: 24, nombre: "Laboratorio de Métodos Numéricos y Diseño de Algoritmos III", prerequisitos: [17] },
+              { id: 25, nombre: "Mecánica de Fluidos", prerequisitos: [8, 12, 13] },
+              { id: 26, nombre: "Laboratorio de Mecánica de Fluidos", prerequisitos: [8, 12, 13] },
+              { id: 27, nombre: "Transmisión de Calor", prerequisitos: [16] },
+              { id: 28, nombre: "Mecanismos", prerequisitos: [67] },
+              { id: 29, nombre: "Elementos de Máquinas I", prerequisitos: [19] },
+            ],
+          },
+          {
+            semestre: "5º Semestre",
+            materias: [
+              { id: 30, nombre: "Controles Automáticos", prerequisitos: [14] },
+              { id: 31, nombre: "Laboratorio de Controles Automáticos", prerequisitos: [14] },
+              { id: 32, nombre: "Máquinas Eléctricas", prerequisitos: [20, 21] },
+              { id: 33, nombre: "Laboratorio de Máquinas Eléctricas", prerequisitos: [20, 21] },
+              { id: 34, nombre: "Electrónica I", prerequisitos: [20, 21] },
+              { id: 35, nombre: "Laboratorio de Electrónica I", prerequisitos: [20, 21] },
+              { id: 36, nombre: "Ingeniería Térmica", prerequisitos: [27] },
+              { id: 38, nombre: "Laboratorio de Ingeniería de Térmica", prerequisitos: [27] },
+              { id: 37, nombre: "Elementos de Máquinas II", prerequisitos: [28, 29] },
+            ],
+          },
+          {
+            semestre: "6º Semestre",
+            materias: [
+              { id: 40, nombre: "Instrumentación Electrónica Mecánica", prerequisitos: [30, 31, 32, 33] },
+              { id: 41, nombre: "Lab. Instrumentación Electrónica Mecánica", prerequisitos: [30, 31, 32, 33] },
+              { id: 42, nombre: "Microprocesadores y Microcontroladores", prerequisitos: [28, 34, 35] },
+              { id: 43, nombre: "Lab. Microprocesadores y Microcontroladores", prerequisitos: [28, 34, 35] },
+              { id: 44, nombre: "Sistemas Digitales", prerequisitos: [34, 35] },
+              { id: 45, nombre: "Laboratorio Sistemas Digitales", prerequisitos: [34, 35] },
+              { id: 46, nombre: "Máquinas Neumáticas", prerequisitos: [25, 26] },
+              { id: 47, nombre: "Lab. Máquinas Neumáticas", prerequisitos: [25, 26] },
+              { id: 48, nombre: "Procesos de Manufactura II", prerequisitos: [37] },
+              { id: 49, nombre: "Taller Procesos de Manufactura II", prerequisitos: [37] },
+            ],
+          },
+          {
+            semestre: "7º Semestre",
+            materias: [
+              { id: 50, nombre: "Procesamiento Digital de Señales", prerequisitos: [44, 45, 40, 41] },
+              { id: 51, nombre: "Lab. Procesamiento Digital de Señales", prerequisitos: [44, 45, 40, 41] },
+              { id: 52, nombre: "Interacción HD-SW", prerequisitos: [44, 45, 42, 43] },
+              { id: 53, nombre: "Electrónica Industrial", prerequisitos: [44, 45] },
+              { id: 54, nombre: "Lab. Electrónica Industrial", prerequisitos: [44, 45] },
+            ],
+          },
+          {
+            semestre: "8º Semestre",
+            materias: [
+              { id: 58, nombre: "Diseño de Sistemas de Control", prerequisitos: [30, 31] },
+              { id: 59, nombre: "Lab. Diseño de Sistemas de Control", prerequisitos: [30, 31] },
+              { id: 60, nombre: "Micro y Nano Tecnología", prerequisitos: [50, 51] },
+              { id: 61, nombre: "Lab. Micro y Nano Tecnología", prerequisitos: [50, 51] },
+              { id: 62, nombre: "Redes Industriales", prerequisitos: [50, 51, 53, 54] },
+              { id: 63, nombre: "Lab. Redes Industriales", prerequisitos: [50, 51, 53, 54] },
+              { id: 64, nombre: "Diseño Mecatrónico", prerequisitos: [46, 47, 48, 49, 50, 51] },
+              { id: 65, nombre: "Taller Diseño Mecatrónico", prerequisitos: [46, 47, 48, 49, 50, 51] },
+              { id: 66, nombre: "TRABAJO DE TITULACIÓN", prerequisitos: [58, 59, 60, 61, 62, 63, 64, 65] },
+            ],
+          },
+        ],
+      },
+    };
+
+    const carreraSelect = document.getElementById("carrera-select");
+    const materiasAprobadasSection = document.getElementById("materias-aprobadas");
+    const accordionSemestres = document.getElementById("accordionSemestres");
+    const checkAvailableButton = document.getElementById("check-available");
+    const availableList = document.getElementById("available-list");
+    const materiasDisponiblesSection = document.getElementById("materias-disponibles");
+    const horarioSection = document.getElementById("horario-section");
+
+    let materias = []; // Almacena las materias seleccionadas por carrera
+    let availableMaterias = []; // Almacena las materias disponibles
+
     // Generar el horario
     document.addEventListener('DOMContentLoaded', function () {
       const schedule = document.getElementById('schedule');
-      const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sabado'];
+      const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       const hours = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
 
       // Crear encabezados de días
@@ -191,31 +628,199 @@
         }
       });
 
-      // Mostrar sección de horario cuando haya materias disponibles
-      document.getElementById('check-available').addEventListener('click', function () {
-        document.getElementById('horario-section').style.display = 'block';
+      // Configurar eventos de arrastre para las celdas del horario
+      setupDropZones();
+    });
+
+    // Mostrar materias por semestre
+    carreraSelect.addEventListener("change", () => {
+      const carrera = planes[carreraSelect.value];
+      if (!carrera) return;
+
+      materias = carrera.semestres.flatMap((s) => s.materias);
+      accordionSemestres.innerHTML = "";
+
+      carrera.semestres.forEach((semestre, index) => {
+        const idAcordeon = `semestre-${index}`;
+        const card = `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-${idAcordeon}">
+              <button class="accordion-button ${index !== 0 ? "collapsed" : ""}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${idAcordeon}" aria-expanded="${index === 0}" aria-controls="collapse-${idAcordeon}">
+                ${semestre.semestre}
+              </button>
+            </h2>
+            <div id="collapse-${idAcordeon}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}" aria-labelledby="heading-${idAcordeon}" data-bs-parent="#accordionSemestres">
+              <div class="accordion-body">
+                ${semestre.materias
+            .map(
+              (materia) => `
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="materia-${materia.id}" value="${materia.id}">
+                    <label class="form-check-label" for="materia-${materia.id}">${materia.nombre}</label>
+                  </div>
+                `
+            )
+            .join("")}
+              </div>
+            </div>
+          </div>
+        `;
+        accordionSemestres.insertAdjacentHTML("beforeend", card);
       });
 
-      // Funcionalidad para agregar cursos manualmente
-      document.getElementById('add-course').addEventListener('click', () => {
-        const courseName = prompt("Nombre de la materia:");
-        if (courseName) {
-          const courseDays = prompt("Días (ej. Lunes,Martes):").split(',');
-          const courseTime = prompt("Hora de inicio (ej. 8:00):");
-          const duration = parseInt(prompt("Duración (en horas):", "2")) || 2;
+      materiasAprobadasSection.style.display = "block";
+      materiasDisponiblesSection.style.display = "none";
+      horarioSection.style.display = "none";
+    });
 
-          const course = {
-            name: courseName,
-            days: courseDays.map(day => day.trim()),
-            time: courseTime,
-            duration: duration
-          };
+    // Calcular materias disponibles
+    checkAvailableButton.addEventListener("click", () => {
+      const checkedIds = Array.from(
+        document.querySelectorAll("#accordionSemestres input:checked")
+      ).map((checkbox) => parseInt(checkbox.value));
 
-          placeCourseOnSchedule(course);
+      availableMaterias = materias.filter((materia) => {
+        return (
+          !checkedIds.includes(materia.id) &&
+          materia.prerequisitos.every((req) => checkedIds.includes(req))
+        );
+      });
+
+      displayAvailableCourses(availableMaterias);
+      materiasDisponiblesSection.style.display = "block";
+      horarioSection.style.display = "block";
+    });
+
+    // Mostrar materias disponibles como elementos arrastrables
+    function displayAvailableCourses(courses) {
+      availableList.innerHTML = "";
+
+      if (courses.length === 0) {
+        availableList.innerHTML = "<li class='list-group-item'>No hay materias disponibles por ahora.</li>";
+      } else {
+        courses.forEach((materia) => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item draggable-course';
+          li.textContent = materia.nombre;
+          li.draggable = true;
+          li.dataset.course = JSON.stringify(materia);
+          
+          li.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', this.dataset.course);
+            this.classList.add('dragging');
+          });
+          
+          li.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+          });
+          
+          availableList.appendChild(li);
+        });
+      }
+    }
+
+    // Configurar zonas donde se pueden soltar las materias
+    function setupDropZones() {
+      document.querySelectorAll('.schedule-cell').forEach(cell => {
+        cell.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.classList.add('drop-hover');
+        });
+        
+        cell.addEventListener('dragleave', function() {
+          this.classList.remove('drop-hover');
+        });
+        
+        cell.addEventListener('drop', function(e) {
+          e.preventDefault();
+          this.classList.remove('drop-hover');
+          
+          const courseData = e.dataTransfer.getData('text/plain');
+          if (courseData) {
+            try {
+              const course = JSON.parse(courseData);
+              placeCourseInCell(this, course);
+            } catch (error) {
+              console.error('Error al procesar los datos del curso:', error);
+            }
+          }
+        });
+      });
+    }
+
+    // Colocar un curso en una celda específica
+    function placeCourseInCell(cell, course) {
+      // Verificar si ya existe el curso en esta celda
+      const existingCourse = cell.querySelector(`.course-block[data-course="${course.id}"]`);
+      if (existingCourse) return;
+      
+      // Limpiar conflictos previos
+      cell.classList.remove('conflict');
+      
+      // Crear el bloque del curso
+      const courseDiv = document.createElement('div');
+      courseDiv.className = 'course-block';
+      courseDiv.textContent = course.nombre;
+      courseDiv.dataset.course = course.id;
+      courseDiv.draggable = true;
+      
+      // Botón para eliminar
+      const deleteBtn = document.createElement('span');
+      deleteBtn.className = 'course-delete';
+      deleteBtn.innerHTML = '×';
+      deleteBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        courseDiv.remove();
+        checkForConflicts();
+      });
+      
+      courseDiv.appendChild(deleteBtn);
+      cell.appendChild(courseDiv);
+      
+      // Verificar choques
+      checkForConflicts();
+    }
+
+    // Verificar choques de horario
+    function checkForConflicts() {
+      // Limpiar conflictos anteriores
+      document.querySelectorAll('.conflict').forEach(el => {
+        el.classList.remove('conflict');
+      });
+      
+      let hasConflicts = false;
+      const allCells = document.querySelectorAll('.schedule-cell:not(.schedule-header)');
+      
+      allCells.forEach(cell => {
+        if (cell.children.length > 1) {
+          hasConflicts = true;
+          cell.classList.add('conflict');
+          Array.from(cell.children).forEach(child => {
+            child.classList.add('conflict');
+          });
         }
       });
+      
+      return hasConflicts;
+    }
 
-      function placeCourseOnSchedule(course) {
+    // Funcionalidad para agregar cursos manualmente
+    document.getElementById('add-course').addEventListener('click', () => {
+      const courseName = prompt("Nombre de la materia:");
+      if (courseName) {
+        const courseDays = prompt("Días (ej. Lunes,Martes):").split(',');
+        const courseTime = prompt("Hora de inicio (ej. 8:00):");
+        const duration = parseInt(prompt("Duración (en horas):", "2")) || 2;
+        
+        const course = {
+          id: Date.now(), // ID temporal
+          nombre: courseName,
+          days: courseDays.map(day => day.trim()),
+          time: courseTime,
+          duration: duration
+        };
+        
+        // Colocar en todas las celdas correspondientes
         course.days.forEach(day => {
           const timeIndex = hours.indexOf(course.time);
           if (timeIndex !== -1) {
@@ -223,81 +828,34 @@
               const currentHour = hours[timeIndex + i];
               const cell = document.querySelector(`.schedule-cell[data-day="${day}"][data-time="${currentHour}"]`);
               if (cell) {
-                const courseDiv = document.createElement('div');
-                courseDiv.className = 'course-block';
-                courseDiv.textContent = course.name;
-                courseDiv.dataset.course = course.name;
-                cell.appendChild(courseDiv);
+                placeCourseInCell(cell, course);
               }
             }
           }
         });
       }
+    });
 
-      // Verificar choques de horario
-      document.getElementById('check-conflicts').addEventListener('click', () => {
-        // Limpiar conflictos anteriores
-        document.querySelectorAll('.conflict').forEach(el => {
-          el.classList.remove('conflict');
+    // Verificar choques de horario
+    document.getElementById('check-conflicts').addEventListener('click', () => {
+      const hasConflicts = checkForConflicts();
+      
+      if (hasConflicts) {
+        alert("¡Hay choques en tu horario! Las celdas en rojo indican conflictos.");
+      } else {
+        alert("No hay choques en tu horario. ¡Todo está bien!");
+      }
+    });
+
+    // Limpiar horario
+    document.getElementById('clear-schedule').addEventListener('click', () => {
+      if (confirm("¿Estás seguro de que quieres limpiar todo el horario?")) {
+        document.querySelectorAll('.schedule-cell:not(.schedule-header)').forEach(cell => {
+          cell.innerHTML = '';
         });
-
-        let hasConflicts = false;
-        const allCells = document.querySelectorAll('.schedule-cell:not(.schedule-header)');
-
-        allCells.forEach(cell => {
-          if (cell.children.length > 1) {
-            hasConflicts = true;
-            cell.classList.add('conflict');
-            Array.from(cell.children).forEach(child => {
-              child.classList.add('conflict');
-            });
-          }
-        });
-
-        if (hasConflicts) {
-          alert("¡Hay choques en tu horario! Las celdas en rojo indican conflictos.");
-        } else {
-          alert("No hay choques en tu horario. ¡Todo está bien!");
-        }
-      });
-
-      // Limpiar horario
-      document.getElementById('clear-schedule').addEventListener('click', () => {
-        if (confirm("¿Estás seguro de que quieres limpiar todo el horario?")) {
-          document.querySelectorAll('.schedule-cell:not(.schedule-header)').forEach(cell => {
-            cell.innerHTML = '';
-          });
-        }
-      });
-
-      // Hacer las materias disponibles arrastrables
-      document.getElementById('available-list').addEventListener('dragstart', function (e) {
-        if (e.target.classList.contains('list-group-item')) {
-          e.dataTransfer.setData('text/plain', e.target.textContent);
-        }
-      });
-
-      // Permitir soltar materias en el horario
-      document.querySelectorAll('.schedule-cell').forEach(cell => {
-        cell.addEventListener('dragover', function (e) {
-          e.preventDefault();
-        });
-
-        cell.addEventListener('drop', function (e) {
-          e.preventDefault();
-          const courseName = e.dataTransfer.getData('text/plain');
-          if (courseName) {
-            const courseDiv = document.createElement('div');
-            courseDiv.className = 'course-block';
-            courseDiv.textContent = courseName;
-            courseDiv.draggable = true;
-            this.appendChild(courseDiv);
-          }
-        });
-      });
+      }
     });
   </script>
-  <script src="script.js"></script>
 </body>
 
 </html>
