@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MECAMANIA-Consulta de Materias y Horarios</title>
+  <title>Consulta de Materias y Horarios</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
@@ -94,7 +94,7 @@
     <section id="horario-section" class="mt-5" style="display: none;">
       <h2>Organizador de Horario</h2>
       <div class="alert alert-info">
-        Arrastra las materias disponibles a tu horario semanal y verifica que no haya choques.
+        Registra las materias disponibles a tu horario semanal y verifica que no haya choques.
       </div>
 
       <div class="schedule-controls">
@@ -154,17 +154,9 @@
   </main>
 
   <footer class="bg-dark text-center py-3">
-    <p class="text-white">Desarrollado por MECA-MANIA para estudiantes con ❤️</p>
-    <p class="text-white">Síguenos en nuestras redes sociales</p>
-    <div class="d-flex justify-content-center gap-3">
-      <a href="https://www.facebook.com/profile.php?id=61568621474059" target="_blank" class="text-white fs-4">
-        <i class="bi bi-facebook"></i>
-      </a>
-      <a href="https://www.tiktok.com/@meca.mania?_t=8rZyOw1Hk51&_r=1" target="_blank" class="text-white fs-4">
-        <i class="bi bi-tiktok"></i>
-      </a>
-    </div>
-    <p class="text-white">&copy; 2024 MECA-MANIA/mone. Todos los derechos reservados.</p>
+    <p class="text-white">Desarrollado para estudiantes con ❤️</p>
+   
+    <p class="text-white">&copy; 2024 /mone. Todos los derechos reservados.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -172,7 +164,7 @@
     // Generar el horario
     document.addEventListener('DOMContentLoaded', function () {
       const schedule = document.getElementById('schedule');
-      const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+      const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sabado'];
       const hours = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
 
       // Crear encabezados de días
