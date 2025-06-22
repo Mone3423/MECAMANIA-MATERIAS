@@ -149,6 +149,51 @@
       font-weight: bold;
       margin-left: 5px;
     }
+
+    .correlativas-info {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+
+    .materia-item {
+      margin-bottom: 8px;
+    }
+
+    .semestre-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .select-all-btn {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+    }
+
+    .materia-disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .prerequisitos-list {
+      list-style-type: none;
+      padding-left: 15px;
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    .prerequisito-item {
+      margin-bottom: 3px;
+    }
+
+    .prerequisito-cumplido {
+      color: #28a745;
+    }
+
+    .prerequisito-pendiente {
+      color: #dc3545;
+    }
   </style>
 </head>
 
@@ -593,14 +638,186 @@
     const materiasDisponiblesSection = document.getElementById("materias-disponibles");
     const horarioSection = document.getElementById("horario-section");
 
-    let materias = []; // Almacena las materias seleccionadas por carrera
-    let availableMaterias = []; // Almacena las materias disponibles
+    let materias = [];
+    let availableMaterias = [];
+    let checkedMaterias = new Set(); // Usamos un Set para llevar registro de materias aprobadas
+    const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const hours = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+
+    // Función para mostrar tooltip con las correlativas
+    function setupTooltips() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    }
+
+    // Función para marcar/desmarcar todas las materias de un semestre
+    function toggleAllMaterias(semestreIndex, check) {
+      const semestreContainer = document.getElementById(`collapse-semestre-${semestreIndex}`);
+      const checkboxes = semestreContainer.querySelectorAll('input[type="checkbox"]');
+
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = check;
+        const materiaId = parseInt(checkbox.value);
+
+        if (check) {
+          checkedMaterias.add(materiaId);
+        } else {
+          checkedMaterias.delete(materiaId);
+        }
+
+        // Actualizar estado visual de las materias
+        updateMateriaState(checkbox);
+      });
+
+      // Actualizar materias disponibles
+      updateAvailableCourses();
+    }
+
+    // Función para actualizar el estado visual de una materia
+    function updateMateriaState(checkbox) {
+      const materiaId = parseInt(checkbox.value);
+      const materiaItem = checkbox.closest('.materia-item');
+      const prerequisitosList = materiaItem.querySelector('.prerequisitos-list');
+
+      if (!prerequisitosList) return;
+
+      // Verificar si se cumplen los prerequisitos
+      const materia = materias.find(m => m.id === materiaId);
+      const prerequisitosCumplidos = materia.prerequisitos.every(req => checkedMaterias.has(req));
+
+      // Actualizar clases según estado
+      if (prerequisitosCumplidos) {
+        materiaItem.classList.remove('materia-disabled');
+        checkbox.disabled = false;
+      } else {
+        materiaItem.classList.add('materia-disabled');
+        checkbox.disabled = true;
+        checkbox.checked = false;
+        checkedMaterias.delete(materiaId);
+      }
+
+      // Actualizar lista de prerequisitos
+      prerequisitosList.innerHTML = materia.prerequisitos.map(req => {
+        const materiaReq = materias.find(m => m.id === req);
+        const cumple = checkedMaterias.has(req);
+        return `<li class="prerequisito-item ${cumple ? 'prerequisito-cumplido' : 'prerequisito-pendiente'}">
+          ${materiaReq ? materiaReq.nombre : `Materia ${req}`}
+          ${cumple ? '✓' : '✗'}
+        </li>`;
+      }).join('');
+    }
+
+    // Función para actualizar las materias disponibles
+    function updateAvailableCourses() {
+      availableMaterias = materias.filter(materia => {
+        return (
+          !checkedMaterias.has(materia.id) &&
+          materia.prerequisitos.every(req => checkedMaterias.has(req))
+        );
+      });
+
+      displayAvailableCourses(availableMaterias);
+    }
+    // Mostrar materias por semestre con botón de "Marcar todas"
+    carreraSelect.addEventListener("change", () => {
+      const carrera = planes[carreraSelect.value];
+      if (!carrera) return;
+
+      materias = carrera.semestres.flatMap((s) => s.materias);
+      checkedMaterias.clear();
+      accordionSemestres.innerHTML = "";
+
+      carrera.semestres.forEach((semestre, index) => {
+        const idAcordeon = `semestre-${index}`;
+        const card = `
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-${idAcordeon}">
+              <div class="semestre-header w-100 pe-3">
+                <button class="accordion-button ${index !== 0 ? "collapsed" : ""}" type="button" 
+                  data-bs-toggle="collapse" data-bs-target="#collapse-${idAcordeon}" 
+                  aria-expanded="${index === 0}" aria-controls="collapse-${idAcordeon}">
+                  ${semestre.semestre}
+                </button>
+                <button class="select-all-btn btn btn-sm btn-outline-primary" 
+                  onclick="toggleAllMaterias(${index}, true)">
+                  Marcar todas
+                </button>
+                <button class="select-all-btn btn btn-sm btn-outline-secondary ms-1" 
+                  onclick="toggleAllMaterias(${index}, false)">
+                  Desmarcar
+                </button>
+              </div>
+            </h2>
+            <div id="collapse-${idAcordeon}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}" 
+              aria-labelledby="heading-${idAcordeon}" data-bs-parent="#accordionSemestres">
+              <div class="accordion-body">
+                ${semestre.materias
+            .map(materia => `
+                    <div class="materia-item" data-materia-id="${materia.id}">
+                      <div class="form-check">
+                        <input class="form-check-input materia-checkbox" type="checkbox" 
+                          id="materia-${materia.id}" value="${materia.id}"
+                          onchange="handleMateriaCheckboxChange(this)">
+                        <label class="form-check-label" for="materia-${materia.id}">
+                          ${materia.nombre}
+                        </label>
+                        <div class="correlativas-info">
+                          <small class="text-muted">Correlativas:</small>
+                          <ul class="prerequisitos-list">
+                            ${materia.prerequisitos.map(req => {
+              const materiaReq = materias.find(m => m.id === req);
+              return `<li class="prerequisito-item prerequisito-pendiente">
+                                ${materiaReq ? materiaReq.nombre : `Materia ${req}`} ✗
+                              </li>`;
+            }).join('')}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        accordionSemestres.insertAdjacentHTML("beforeend", card);
+      });
+
+      // Inicializar tooltips y estados de materias
+      setupTooltips();
+      materiasAprobadasSection.style.display = "block";
+      materiasDisponiblesSection.style.display = "none";
+      horarioSection.style.display = "none";
+    });
+
+    // Manejar cambios en los checkboxes de materias
+    function handleMateriaCheckboxChange(checkbox) {
+      const materiaId = parseInt(checkbox.value);
+
+      if (checkbox.checked) {
+        checkedMaterias.add(materiaId);
+      } else {
+        checkedMaterias.delete(materiaId);
+      }
+
+      // Actualizar estado de todas las materias que dependan de esta
+      updateAllMateriasStates();
+      // Actualizar materias disponibles
+      updateAvailableCourses();
+    }
+
+    // Actualizar el estado de todas las materias
+    function updateAllMateriasStates() {
+      document.querySelectorAll('.materia-checkbox').forEach(checkbox => {
+        updateMateriaState(checkbox);
+      });
+    }
 
     // Generar el horario
-    document.addEventListener('DOMContentLoaded', function () {
+    function generateSchedule() {
       const schedule = document.getElementById('schedule');
-      const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-      const hours = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+      schedule.innerHTML = '';
 
       // Crear encabezados de días
       days.forEach(day => {
@@ -630,66 +847,7 @@
 
       // Configurar eventos de arrastre para las celdas del horario
       setupDropZones();
-    });
-
-    // Mostrar materias por semestre
-    carreraSelect.addEventListener("change", () => {
-      const carrera = planes[carreraSelect.value];
-      if (!carrera) return;
-
-      materias = carrera.semestres.flatMap((s) => s.materias);
-      accordionSemestres.innerHTML = "";
-
-      carrera.semestres.forEach((semestre, index) => {
-        const idAcordeon = `semestre-${index}`;
-        const card = `
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="heading-${idAcordeon}">
-              <button class="accordion-button ${index !== 0 ? "collapsed" : ""}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${idAcordeon}" aria-expanded="${index === 0}" aria-controls="collapse-${idAcordeon}">
-                ${semestre.semestre}
-              </button>
-            </h2>
-            <div id="collapse-${idAcordeon}" class="accordion-collapse collapse ${index === 0 ? "show" : ""}" aria-labelledby="heading-${idAcordeon}" data-bs-parent="#accordionSemestres">
-              <div class="accordion-body">
-                ${semestre.materias
-            .map(
-              (materia) => `
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="materia-${materia.id}" value="${materia.id}">
-                    <label class="form-check-label" for="materia-${materia.id}">${materia.nombre}</label>
-                  </div>
-                `
-            )
-            .join("")}
-              </div>
-            </div>
-          </div>
-        `;
-        accordionSemestres.insertAdjacentHTML("beforeend", card);
-      });
-
-      materiasAprobadasSection.style.display = "block";
-      materiasDisponiblesSection.style.display = "none";
-      horarioSection.style.display = "none";
-    });
-
-    // Calcular materias disponibles
-    checkAvailableButton.addEventListener("click", () => {
-      const checkedIds = Array.from(
-        document.querySelectorAll("#accordionSemestres input:checked")
-      ).map((checkbox) => parseInt(checkbox.value));
-
-      availableMaterias = materias.filter((materia) => {
-        return (
-          !checkedIds.includes(materia.id) &&
-          materia.prerequisitos.every((req) => checkedIds.includes(req))
-        );
-      });
-
-      displayAvailableCourses(availableMaterias);
-      materiasDisponiblesSection.style.display = "block";
-      horarioSection.style.display = "block";
-    });
+    }
 
     // Mostrar materias disponibles como elementos arrastrables
     function displayAvailableCourses(courses) {
@@ -704,37 +862,51 @@
           li.textContent = materia.nombre;
           li.draggable = true;
           li.dataset.course = JSON.stringify(materia);
-          
-          li.addEventListener('dragstart', function(e) {
+
+          li.addEventListener('dragstart', function (e) {
             e.dataTransfer.setData('text/plain', this.dataset.course);
             this.classList.add('dragging');
           });
-          
-          li.addEventListener('dragend', function() {
+
+          li.addEventListener('dragend', function () {
             this.classList.remove('dragging');
           });
-          
+
+          // Tooltip con información de la materia
+          li.setAttribute('data-bs-toggle', 'tooltip');
+          li.setAttribute('data-bs-placement', 'top');
+          li.setAttribute('title', `Correlativas: ${materia.prerequisitos.length > 0 ?
+            materia.prerequisitos.map(req => {
+              const materiaReq = materias.find(m => m.id === req);
+              return materiaReq ? materiaReq.nombre : `Materia ${req}`;
+            }).join(', ') :
+            'Ninguna'
+            }`);
+
           availableList.appendChild(li);
         });
+
+        // Inicializar tooltips para las materias disponibles
+        setupTooltips();
       }
     }
 
     // Configurar zonas donde se pueden soltar las materias
     function setupDropZones() {
-      document.querySelectorAll('.schedule-cell').forEach(cell => {
-        cell.addEventListener('dragover', function(e) {
+      document.querySelectorAll('.schedule-cell:not(.schedule-header)').forEach(cell => {
+        cell.addEventListener('dragover', function (e) {
           e.preventDefault();
           this.classList.add('drop-hover');
         });
-        
-        cell.addEventListener('dragleave', function() {
+
+        cell.addEventListener('dragleave', function () {
           this.classList.remove('drop-hover');
         });
-        
-        cell.addEventListener('drop', function(e) {
+
+        cell.addEventListener('drop', function (e) {
           e.preventDefault();
           this.classList.remove('drop-hover');
-          
+
           const courseData = e.dataTransfer.getData('text/plain');
           if (courseData) {
             try {
@@ -753,30 +925,30 @@
       // Verificar si ya existe el curso en esta celda
       const existingCourse = cell.querySelector(`.course-block[data-course="${course.id}"]`);
       if (existingCourse) return;
-      
+
       // Limpiar conflictos previos
       cell.classList.remove('conflict');
-      
+
       // Crear el bloque del curso
       const courseDiv = document.createElement('div');
       courseDiv.className = 'course-block';
       courseDiv.textContent = course.nombre;
       courseDiv.dataset.course = course.id;
       courseDiv.draggable = true;
-      
+
       // Botón para eliminar
       const deleteBtn = document.createElement('span');
       deleteBtn.className = 'course-delete';
       deleteBtn.innerHTML = '×';
-      deleteBtn.addEventListener('click', function(e) {
+      deleteBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         courseDiv.remove();
         checkForConflicts();
       });
-      
+
       courseDiv.appendChild(deleteBtn);
       cell.appendChild(courseDiv);
-      
+
       // Verificar choques
       checkForConflicts();
     }
@@ -787,10 +959,10 @@
       document.querySelectorAll('.conflict').forEach(el => {
         el.classList.remove('conflict');
       });
-      
+
       let hasConflicts = false;
       const allCells = document.querySelectorAll('.schedule-cell:not(.schedule-header)');
-      
+
       allCells.forEach(cell => {
         if (cell.children.length > 1) {
           hasConflicts = true;
@@ -800,7 +972,7 @@
           });
         }
       });
-      
+
       return hasConflicts;
     }
 
@@ -811,7 +983,7 @@
         const courseDays = prompt("Días (ej. Lunes,Martes):").split(',');
         const courseTime = prompt("Hora de inicio (ej. 8:00):");
         const duration = parseInt(prompt("Duración (en horas):", "2")) || 2;
-        
+
         const course = {
           id: Date.now(), // ID temporal
           nombre: courseName,
@@ -819,7 +991,7 @@
           time: courseTime,
           duration: duration
         };
-        
+
         // Colocar en todas las celdas correspondientes
         course.days.forEach(day => {
           const timeIndex = hours.indexOf(course.time);
@@ -839,7 +1011,7 @@
     // Verificar choques de horario
     document.getElementById('check-conflicts').addEventListener('click', () => {
       const hasConflicts = checkForConflicts();
-      
+
       if (hasConflicts) {
         alert("¡Hay choques en tu horario! Las celdas en rojo indican conflictos.");
       } else {
@@ -855,6 +1027,18 @@
         });
       }
     });
+
+    // Calcular materias disponibles
+    checkAvailableButton.addEventListener("click", () => {
+      updateAvailableCourses();
+      materiasDisponiblesSection.style.display = "block";
+      horarioSection.style.display = "block";
+      generateSchedule();
+    });
+
+    // Hacer funciones accesibles globalmente para los botones
+    window.toggleAllMaterias = toggleAllMaterias;
+    window.handleMateriaCheckboxChange = handleMateriaCheckboxChange;
   </script>
 </body>
 
