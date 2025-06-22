@@ -1,88 +1,150 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  header {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centra la imagen y el texto horizontalmente */
-    justify-content: center; /* Centra verticalmente */
-    text-align: center;
-    overflow: hidden; /* Oculta cualquier contenido que se salga del contenedor */
-  }
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  /* Imagen del logo */
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centra la imagen y el texto horizontalmente */
+  justify-content: center;
+  /* Centra verticalmente */
+  text-align: center;
+  overflow: hidden;
+  /* Oculta cualquier contenido que se salga del contenedor */
+}
+
+/* Imagen del logo */
+.logo {
+  max-width: 100px;
+  /* Limita el ancho máximo de la imagen */
+  height: auto;
+  /* Mantiene la proporción */
+  margin-bottom: 1rem;
+  /* Espacio debajo de la imagen */
+}
+
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 768px) {
   .logo {
-    max-width: 100px; /* Limita el ancho máximo de la imagen */
-    height: auto; /* Mantiene la proporción */
-    margin-bottom: 1rem; /* Espacio debajo de la imagen */
+    max-width: 100px;
+    /* Tamaño más pequeño para móviles */
   }
-
-  /* Responsividad para pantallas pequeñas */
-  @media (max-width: 768px) {
-    .logo {
-      max-width: 100px; /* Tamaño más pequeño para móviles */
-    }
-  }
-  
-  
-  main {
-    padding: 20px;
-  }
-  
-  section {
-    margin-bottom: 20px;
-  }
-  
-  #checkbox-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-  }
-  
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #0077cc;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  button:hover {
-    background-color: #005fa3;
-  }
-  
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  ul li {
-    margin: 5px 0;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-  }
-  
+}
 
 
-  footer {
-    background-color: #c90505;
-    color: white;
-    padding: 20px 0;
-    text-align: center;
-  }
-  footer .social-icons a {
-    color: white;
-    margin: 0 10px;
-    font-size: 1.5rem;
-    text-decoration: none;
-  }
-  footer .social-icons a:hover {
-    color: #17a2b8;
-  }
+main {
+  padding: 20px;
+}
+
+section {
+  margin-bottom: 20px;
+}
+
+#checkbox-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #0077cc;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  margin: 5px 0;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+
+
+footer {
+  background-color: #c90505;
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+
+footer .social-icons a {
+  color: white;
+  margin: 0 10px;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
+footer .social-icons a:hover {
+  color: #17a2b8;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: 80px repeat(5, 1fr);
+  grid-gap: 1px;
+  background-color: #ddd;
+}
+
+.cell {
+  background-color: white;
+  padding: 10px;
+  min-height: 50px;
+}
+
+.header {
+  font-weight: bold;
+  text-align: center;
+  background-color: #f0f0f0;
+}
+
+.course {
+  background-color: #e3f2fd;
+  margin: 2px;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: move;
+}
+
+.conflict {
+  background-color: #ffcdd2 !important;
+}
+
+#course-list {
+  width: 250px;
+}
+
+.course-item {
+  padding: 8px;
+  margin: 5px 0;
+  background-color: #e3f2fd;
+  cursor: grab;
+}
