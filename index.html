@@ -14,23 +14,27 @@
     .schedule-container {
       margin-top: 20px;
     }
+
     .schedule {
       display: grid;
       grid-template-columns: 80px repeat(5, 1fr);
       gap: 1px;
       background-color: #ddd;
     }
+
     .schedule-cell {
       background-color: white;
       padding: 8px;
       min-height: 50px;
       border: 1px solid #dee2e6;
     }
+
     .schedule-header {
       font-weight: bold;
       text-align: center;
       background-color: #f0f0f0;
     }
+
     .course-block {
       background-color: #e3f2fd;
       margin: 2px;
@@ -39,9 +43,11 @@
       font-size: 12px;
       cursor: move;
     }
+
     .conflict {
       background-color: #ffcdd2 !important;
     }
+
     .schedule-controls {
       margin-bottom: 15px;
     }
@@ -90,7 +96,7 @@
       <div class="alert alert-info">
         Arrastra las materias disponibles a tu horario semanal y verifica que no haya choques.
       </div>
-      
+
       <div class="schedule-controls">
         <button id="add-course" class="btn btn-success btn-sm">
           <i class="bi bi-plus-circle"></i> Añadir Materia Manualmente
@@ -102,7 +108,7 @@
           <i class="bi bi-trash"></i> Limpiar Horario
         </button>
       </div>
-      
+
       <div class="schedule-container">
         <div class="schedule" id="schedule">
           <!-- Horario se generará aquí -->
@@ -132,7 +138,8 @@
           <div class="card mb-3">
             <div class="card-body">
               <h5 class="card-title"><i class="bi bi-calendar"></i> Tip 2</h5>
-              <p class="card-text">Revisa los horarios de materias para evitar choques al momento de inscribirte y recuerda que hay materias que puedes condicionar</p>
+              <p class="card-text">Revisa los horarios de materias para evitar choques al momento de inscribirte y
+                recuerda que hay materias que puedes condicionar</p>
             </div>
           </div>
           <div class="card mb-3">
@@ -163,11 +170,11 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Generar el horario
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const schedule = document.getElementById('schedule');
       const days = ['Hora', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
       const hours = ['7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
-      
+
       // Crear encabezados de días
       days.forEach(day => {
         const cell = document.createElement('div');
@@ -175,7 +182,7 @@
         cell.textContent = day;
         schedule.appendChild(cell);
       });
-      
+
       // Crear celdas de horas
       hours.forEach(hour => {
         // Celda de hora
@@ -183,7 +190,7 @@
         timeCell.className = 'schedule-cell schedule-header';
         timeCell.textContent = hour;
         schedule.appendChild(timeCell);
-        
+
         // Celdas para cada día
         for (let i = 1; i < days.length; i++) {
           const cell = document.createElement('div');
@@ -193,12 +200,12 @@
           schedule.appendChild(cell);
         }
       });
-      
+
       // Mostrar sección de horario cuando haya materias disponibles
-      document.getElementById('check-available').addEventListener('click', function() {
+      document.getElementById('check-available').addEventListener('click', function () {
         document.getElementById('horario-section').style.display = 'block';
       });
-      
+
       // Funcionalidad para agregar cursos manualmente
       document.getElementById('add-course').addEventListener('click', () => {
         const courseName = prompt("Nombre de la materia:");
@@ -206,18 +213,18 @@
           const courseDays = prompt("Días (ej. Lunes,Martes):").split(',');
           const courseTime = prompt("Hora de inicio (ej. 8:00):");
           const duration = parseInt(prompt("Duración (en horas):", "2")) || 2;
-          
+
           const course = {
             name: courseName,
             days: courseDays.map(day => day.trim()),
             time: courseTime,
             duration: duration
           };
-          
+
           placeCourseOnSchedule(course);
         }
       });
-      
+
       function placeCourseOnSchedule(course) {
         course.days.forEach(day => {
           const timeIndex = hours.indexOf(course.time);
@@ -236,17 +243,17 @@
           }
         });
       }
-      
+
       // Verificar choques de horario
       document.getElementById('check-conflicts').addEventListener('click', () => {
         // Limpiar conflictos anteriores
         document.querySelectorAll('.conflict').forEach(el => {
           el.classList.remove('conflict');
         });
-        
+
         let hasConflicts = false;
         const allCells = document.querySelectorAll('.schedule-cell:not(.schedule-header)');
-        
+
         allCells.forEach(cell => {
           if (cell.children.length > 1) {
             hasConflicts = true;
@@ -256,14 +263,14 @@
             });
           }
         });
-        
+
         if (hasConflicts) {
           alert("¡Hay choques en tu horario! Las celdas en rojo indican conflictos.");
         } else {
           alert("No hay choques en tu horario. ¡Todo está bien!");
         }
       });
-      
+
       // Limpiar horario
       document.getElementById('clear-schedule').addEventListener('click', () => {
         if (confirm("¿Estás seguro de que quieres limpiar todo el horario?")) {
@@ -272,21 +279,21 @@
           });
         }
       });
-      
+
       // Hacer las materias disponibles arrastrables
-      document.getElementById('available-list').addEventListener('dragstart', function(e) {
+      document.getElementById('available-list').addEventListener('dragstart', function (e) {
         if (e.target.classList.contains('list-group-item')) {
           e.dataTransfer.setData('text/plain', e.target.textContent);
         }
       });
-      
+
       // Permitir soltar materias en el horario
       document.querySelectorAll('.schedule-cell').forEach(cell => {
-        cell.addEventListener('dragover', function(e) {
+        cell.addEventListener('dragover', function (e) {
           e.preventDefault();
         });
-        
-        cell.addEventListener('drop', function(e) {
+
+        cell.addEventListener('drop', function (e) {
           e.preventDefault();
           const courseName = e.dataTransfer.getData('text/plain');
           if (courseName) {
@@ -302,4 +309,5 @@
   </script>
   <script src="script.js"></script>
 </body>
+
 </html>
