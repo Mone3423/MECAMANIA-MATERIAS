@@ -258,7 +258,56 @@
         </div>
       </div>
     </section>
+    <!-- Seccion Calculadora de notas-->
+    <section id="calculadora-notas" class="mt-5" style="display: none;">
+      <h2>Calculadora de Notas</h2>
+      <div class="alert alert-info">
+        Configura el sistema de evaluación de cada materia para calcular qué necesitas para aprobar.
+      </div>
 
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5>Configurar Sistema de Evaluación</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">Seleccionar Materia</label>
+                <select id="materia-notas-select" class="form-select">
+                  <option value="" disabled selected>Elige una materia</option>
+                  <!-- Se llenará dinámicamente -->
+                </select>
+              </div>
+
+              <div id="config-evaluacion-container">
+                <!-- Se generará dinámicamente -->
+              </div>
+
+              <button id="btn-calcular-nota" class="btn btn-primary mt-3">
+                <i class="bi bi-calculator"></i> Calcular Nota Necesaria
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5>Resultados</h5>
+            </div>
+            <div class="card-body">
+              <div id="resultados-notas">
+                <p class="text-muted">Configura el sistema de evaluación y haz clic en calcular.</p>
+              </div>
+              <div class="mt-3" id="detalle-calculadora">
+                <!-- Detalle de cálculos -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
     <!-- Sección de Consejos Útiles -->
     <section id="consejos-utiles" class="mt-5">
       <h2 class="text-center">Consejos Útiles</h2>
@@ -1039,6 +1088,331 @@
     // Hacer funciones accesibles globalmente para los botones
     window.toggleAllMaterias = toggleAllMaterias;
     window.handleMateriaCheckboxChange = handleMateriaCheckboxChange;
+    // Mostrar/ocultar sección de notas cuando se selecciona una carrera
+    carreraSelect.addEventListener("change", () => {
+      // ... (código existente)
+      document.getElementById("calculadora-notas").style.display = "block";
+      setupCalculadoraNotas();
+    });
+
+    function setupCalculadoraNotas() {
+      const materiaNotasSelect = document.getElementById("materia-notas-select");
+      const configEvaluacionContainer = document.getElementById("config-evaluacion-container");
+      const btnCalcularNota = document.getElementById("btn-calcular-nota");
+      const resultadosNotas = document.getElementById("resultados-notas");
+      const detalleCalculadora = document.getElementById("detalle-calculadora");
+
+      // Llenar select de materias
+      materiaNotasSelect.innerHTML = '<option value="" disabled selected>Elige una materia</option>' +
+        materias.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+
+      materiaNotasSelect.addEventListener("change", function () {
+        const materiaId = this.value;
+        if (!materiaId) return;
+
+        // Configuración inicial
+        configEvaluacionContainer.innerHTML = `
+            <!-- Actualiza la sección de configuración en el HTML -->
+        <div id="config-evaluacion-container">
+          <h6 class="mt-3">Configuración de Evaluación</h6>
+          <div class="mb-3">
+            <label class="form-label">Número de Parciales</label>
+            <input type="number" id="num-parciales" class="form-control" min="1" max="4" value="2">
+          </div>
+          
+          <div id="parciales-container">
+            <!-- Se generarán los campos para cada parcial -->
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">¿Incluye Examen Final?</label>
+            <select id="tiene-final" class="form-select">
+              <option value="no" selected>No</option>
+              <option value="si">Sí</option>
+              <option value="recuperatorio">Es recuperatorio</option>
+            </select>
+          </div>
+          
+          <div id="final-container" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label">Peso Examen Final (%)</label>
+              <input type="number" id="peso-final" class="form-control" min="0" max="100" value="30">
+            </div>
+            <div class="mb-3" id="recuperatorio-container" style="display: none;">
+              <label class="form-label">¿Recupera qué parcial?</label>
+              <select id="parcial-recupera" class="form-select">
+                <!-- Se llenará dinámicamente -->
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">¿Incluye Prácticas?</label>
+            <select id="tiene-practicas" class="form-select">
+              <option value="no" selected>No</option>
+              <option value="si">Sí</option>
+            </select>
+          </div>
+          
+          <div id="practicas-container" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label">Peso Prácticas (%)</label>
+              <input type="number" id="peso-practicas" class="form-control" min="0" max="100" value="20">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nota Prácticas (opcional)</label>
+              <input type="number" id="nota-practicas" class="form-control" min="0" max="100" placeholder="Dejar vacío si no presentado">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">¿Incluye Auxiliatura?</label>
+            <select id="tiene-auxiliatura" class="form-select">
+              <option value="no" selected>No</option>
+              <option value="si">Sí</option>
+            </select>
+          </div>
+          
+          <div id="auxiliatura-container" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label">Peso Auxiliatura (%)</label>
+              <input type="number" id="peso-auxiliatura" class="form-control" min="0" max="100" value="10">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nota Auxiliatura (opcional)</label>
+              <input type="number" id="nota-auxiliatura" class="form-control" min="0" max="100" placeholder="Dejar vacío si no presentado">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Nota Mínima para Aprobar</label>
+            <input type="number" id="nota-minima" class="form-control" min="0" max="100" value="60">
+          </div>
+        </div>
+            `;
+
+        // Event listeners para mostrar/ocultar secciones
+        document.getElementById("tiene-final").addEventListener("change", function () {
+          const finalContainer = document.getElementById("final-container");
+          finalContainer.style.display = this.value === "no" ? "none" : "block";
+
+          const recuperatorioContainer = document.getElementById("recuperatorio-container");
+          recuperatorioContainer.style.display = this.value === "recuperatorio" ? "block" : "none";
+
+          if (this.value === "recuperatorio") {
+            actualizarOpcionesRecuperatorio();
+          }
+        });
+
+        document.getElementById("tiene-practicas").addEventListener("change", function () {
+          document.getElementById("practicas-container").style.display = this.value === "si" ? "block" : "none";
+        });
+
+        document.getElementById("tiene-auxiliatura").addEventListener("change", function () {
+          document.getElementById("auxiliatura-container").style.display = this.value === "si" ? "block" : "none";
+        });
+
+        document.getElementById("num-parciales").addEventListener("change", function () {
+          generarCamposParciales(parseInt(this.value));
+          if (document.getElementById("tiene-final").value === "recuperatorio") {
+            actualizarOpcionesRecuperatorio();
+          }
+        });
+
+        // Generar campos iniciales
+        generarCamposParciales(2);
+      });
+
+      function actualizarOpcionesRecuperatorio() {
+        const numParciales = parseInt(document.getElementById("num-parciales").value);
+        const select = document.getElementById("parcial-recupera");
+        select.innerHTML = '';
+
+        for (let i = 1; i <= numParciales; i++) {
+          select.innerHTML += `<option value="${i}">Parcial ${i}</option>`;
+        }
+      }
+
+      function generarCamposParciales(numParciales) {
+        const container = document.getElementById("parciales-container");
+        container.innerHTML = '';
+
+        for (let i = 1; i <= numParciales; i++) {
+          container.innerHTML += `
+        <div class="row mb-2">
+          <div class="col-md-6">
+            <label class="form-label">Peso Parcial ${i} (%)</label>
+            <input type="number" id="peso-parcial-${i}" class="form-control peso-parcial" min="0" max="100" value="${i === 1 ? 30 : 20}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nota Obtenida Parcial ${i} (opcional)</label>
+            <input type="number" id="nota-parcial-${i}" class="form-control nota-parcial" min="0" max="100" placeholder="Dejar vacío si no presentado">
+          </div>
+        </div>
+      `;
+        }
+      }
+
+      function calcularNotaNecesaria() {
+        const numParciales = parseInt(document.getElementById("num-parciales").value);
+        const tieneFinal = document.getElementById("tiene-final").value;
+        const tienePracticas = document.getElementById("tiene-practicas").value === "si";
+        const tieneAuxiliatura = document.getElementById("tiene-auxiliatura").value === "si";
+        const notaMinima = parseFloat(document.getElementById("nota-minima").value);
+
+        // Calcular pesos
+        let pesoParciales = 0;
+        let pesoFinal = 0;
+        let pesoPracticas = 0;
+        let pesoAuxiliatura = 0;
+
+        // Obtener pesos de parciales
+        const pesosParciales = [];
+        for (let i = 1; i <= numParciales; i++) {
+          const peso = parseFloat(document.getElementById(`peso-parcial-${i}`).value);
+          pesosParciales.push(peso);
+          pesoParciales += peso;
+        }
+
+        if (tieneFinal !== "no") {
+          pesoFinal = parseFloat(document.getElementById("peso-final").value);
+        }
+
+        if (tienePracticas) {
+          pesoPracticas = parseFloat(document.getElementById("peso-practicas").value);
+        }
+
+        if (tieneAuxiliatura) {
+          pesoAuxiliatura = parseFloat(document.getElementById("peso-auxiliatura").value);
+        }
+
+        // Validar que la suma de pesos sea 100%
+        const sumaPesos = pesoParciales + pesoFinal + pesoPracticas + pesoAuxiliatura;
+        if (sumaPesos !== 100) {
+          resultadosNotas.innerHTML = `
+        <div class="alert alert-danger">
+          Error: La suma de los porcentajes debe ser 100% (actual: ${sumaPesos}%)
+        </div>
+      `;
+          return;
+        }
+
+        // Obtener notas ingresadas
+        const notasParciales = [];
+        for (let i = 1; i <= numParciales; i++) {
+          const nota = document.getElementById(`nota-parcial-${i}`).value;
+          notasParciales.push(nota ? parseFloat(nota) : null);
+        }
+
+        const notaPracticas = tienePracticas && document.getElementById("nota-practicas").value ?
+          parseFloat(document.getElementById("nota-practicas").value) : null;
+
+        const notaAuxiliatura = tieneAuxiliatura && document.getElementById("nota-auxiliatura").value ?
+          parseFloat(document.getElementById("nota-auxiliatura").value) : null;
+
+        // Calcular nota actual y necesaria
+        let notaActual = 0;
+        let notaNecesaria = 0;
+        let detalle = "<h6>Detalle de Cálculo</h6><ul>";
+        let pesoRestante = 100;
+
+        // Calcular contribución de parciales
+        for (let i = 0; i < numParciales; i++) {
+          if (notasParciales[i] !== null) {
+            const contribucion = notasParciales[i] * pesosParciales[i] / 100;
+            notaActual += contribucion;
+            pesoRestante -= pesosParciales[i];
+            detalle += `<li>Parcial ${i + 1}: ${notasParciales[i]} (${pesosParciales[i]}%) → ${contribucion.toFixed(2)}</li>`;
+          }
+        }
+
+        // Manejar recuperatorio
+        if (tieneFinal === "recuperatorio") {
+          const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value) - 1;
+          if (notasParciales[parcialARecuperar] !== null) {
+            detalle += `<li>El final reemplaza al Parcial ${parcialARecuperar + 1}</li>`;
+          }
+        }
+
+        // Calcular contribución de prácticas
+        if (tienePracticas && notaPracticas !== null) {
+          const contribucion = notaPracticas * pesoPracticas / 100;
+          notaActual += contribucion;
+          pesoRestante -= pesoPracticas;
+          detalle += `<li>Prácticas: ${notaPracticas} (${pesoPracticas}%) → ${contribucion.toFixed(2)}</li>`;
+        }
+
+        // Calcular contribución de auxiliatura
+        if (tieneAuxiliatura && notaAuxiliatura !== null) {
+          const contribucion = notaAuxiliatura * pesoAuxiliatura / 100;
+          notaActual += contribucion;
+          pesoRestante -= pesoAuxiliatura;
+          detalle += `<li>Auxiliatura: ${notaAuxiliatura} (${pesoAuxiliatura}%) → ${contribucion.toFixed(2)}</li>`;
+        }
+
+        // Calcular nota necesaria en los componentes restantes
+        if (pesoRestante > 0) {
+          notaNecesaria = (notaMinima - notaActual) * 100 / pesoRestante;
+          notaNecesaria = Math.max(0, Math.min(100, notaNecesaria)); // Asegurar entre 0 y 100
+
+          detalle += `<li>Nota actual: ${notaActual.toFixed(2)}</li>`;
+
+          if (tieneFinal === "recuperatorio") {
+            const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value);
+            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el final (recupera Parcial ${parcialARecuperar}) para alcanzar ${notaMinima}</li>`;
+          } else if (tieneFinal === "si") {
+            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el final (${pesoFinal}%) para alcanzar ${notaMinima}</li>`;
+          } else {
+            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el resto (${pesoRestante}%) para alcanzar ${notaMinima}</li>`;
+          }
+        } else {
+          notaNecesaria = 0;
+          detalle += `<li>Nota final: ${notaActual.toFixed(2)}</li>`;
+        }
+
+        detalle += "</ul>";
+
+        // Mostrar resultados
+        let resultadoHTML = '';
+        if (notaActual >= notaMinima) {
+          resultadoHTML = `
+        <div class="alert alert-success">
+          <h5>¡Ya estás aprobado!</h5>
+          <p>Tu nota actual es ${notaActual.toFixed(2)} (sobre ${notaMinima} requeridos)</p>
+        </div>
+      `;
+        } else if (pesoRestante > 0) {
+          let mensaje = '';
+          if (tieneFinal === "recuperatorio") {
+            const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value);
+            mensaje = `Necesitas ${notaNecesaria.toFixed(2)} en el final (recupera Parcial ${parcialARecuperar})`;
+          } else if (tieneFinal === "si") {
+            mensaje = `Necesitas ${notaNecesaria.toFixed(2)} en el examen final`;
+          } else {
+            mensaje = `Necesitas ${notaNecesaria.toFixed(2)} en los componentes restantes`;
+          }
+
+          resultadoHTML = `
+        <div class="alert ${notaNecesaria <= 70 ? 'alert-warning' : 'alert-danger'}">
+          <h5>${mensaje}</h5>
+          <p>Nota actual: ${notaActual.toFixed(2)}/${notaMinima}</p>
+          <p>Peso restante: ${pesoRestante}%</p>
+        </div>
+      `;
+        } else {
+          resultadoHTML = `
+        <div class="alert alert-danger">
+          <h5>No hay más evaluaciones disponibles</h5>
+          <p>Tu nota final es ${notaActual.toFixed(2)} (requieres ${notaMinima})</p>
+        </div>
+      `;
+        }
+
+        resultadosNotas.innerHTML = resultadoHTML;
+        detalleCalculadora.innerHTML = detalle;
+      }
+    }
+    
   </script>
 </body>
 
