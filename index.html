@@ -380,6 +380,11 @@
                     <label class="form-label">Peso Examen Final (%)</label>
                     <input type="number" id="peso-final" class="form-control" min="0" max="100" value="30">
                   </div>
+                  <div class="mb-3">
+                    <label class="form-label">Nota del Final (opcional)</label>
+                    <input type="number" id="nota-final" class="form-control" min="0" max="100"
+                      placeholder="Ingrese si ya tiene nota">
+                  </div>
                   <div class="mb-3" id="recuperatorio-container" style="display: none;">
                     <label class="form-label">¿Recupera qué parcial?</label>
                     <select id="parcial-recupera" class="form-select">
@@ -387,7 +392,6 @@
                     </select>
                   </div>
                 </div>
-
                 <!-- Configuración de Prácticas -->
                 <div class="mb-3">
                   <label class="form-label">¿Incluye Prácticas?</label>
@@ -1250,10 +1254,10 @@
     // Hacer funciones accesibles globalmente para los botones
     window.toggleAllMaterias = toggleAllMaterias;
     window.handleMateriaCheckboxChange = handleMateriaCheckboxChange;
-    // Función para configurar la calculadora de notas
+
     function setupCalculadoraNotas() {
+
       const materiaNotasSelect = document.getElementById("materia-notas-select");
-      const configEvaluacionContainer = document.getElementById("config-evaluacion-container");
       const btnCalcularNota = document.getElementById("btn-calcular-nota");
       const resultadosNotas = document.getElementById("resultados-notas");
       const detalleCalculadora = document.getElementById("detalle-calculadora");
@@ -1262,7 +1266,7 @@
       materiaNotasSelect.innerHTML = '<option value="" disabled selected>Elige una materia</option>' +
         materias.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
 
-      // Event listeners para mostrar/ocultar secciones
+      // Configurar eventos
       document.getElementById("tiene-final").addEventListener("change", function () {
         const finalContainer = document.getElementById("final-container");
         finalContainer.style.display = this.value === "no" ? "none" : "block";
@@ -1290,22 +1294,7 @@
         }
       });
 
-      // Generar campos iniciales
-      generarCamposParciales(2);
-
-      // Configurar evento para calcular notas
-      btnCalcularNota.addEventListener("click", calcularNotaNecesaria);
-
-      function actualizarOpcionesRecuperatorio() {
-        const numParciales = parseInt(document.getElementById("num-parciales").value);
-        const select = document.getElementById("parcial-recupera");
-        select.innerHTML = '';
-
-        for (let i = 1; i <= numParciales; i++) {
-          select.innerHTML += `<option value="${i}">Parcial ${i}</option>`;
-        }
-      }
-
+      // Función para generar campos de parciales
       function generarCamposParciales(numParciales) {
         const container = document.getElementById("parciales-container");
         container.innerHTML = '';
@@ -1326,6 +1315,74 @@
         }
       }
 
+      // Función para actualizar opciones de recuperatorio
+      function actualizarOpcionesRecuperatorio() {
+        const numParciales = parseInt(document.getElementById("num-parciales").value);
+        const select = document.getElementById("parcial-recupera");
+        select.innerHTML = '';
+
+        for (let i = 1; i <= numParciales; i++) {
+          select.innerHTML += `<option value="${i}">Parcial ${i}</option>`;
+        }
+      }
+
+      // Función para validar campos
+      function validarCampos() {
+        const numParciales = parseInt(document.getElementById("num-parciales").value);
+        let sumaPorcentajes = 0;
+
+        // Validar pesos de parciales
+        for (let i = 1; i <= numParciales; i++) {
+          const peso = parseFloat(document.getElementById(`peso-parcial-${i}`).value) || 0;
+          if (isNaN(peso) || peso < 0 || peso > 100) {
+            alert(`El peso del Parcial ${i} debe ser entre 0 y 100`);
+            return false;
+          }
+          sumaPorcentajes += peso;
+        }
+
+        // Validar final si aplica
+        const tieneFinal = document.getElementById("tiene-final").value;
+        if (tieneFinal !== "no") {
+          const pesoFinal = parseFloat(document.getElementById("peso-final").value) || 0;
+          if (isNaN(pesoFinal) || pesoFinal < 0 || pesoFinal > 100) {
+            alert("El peso del Final debe ser entre 0 y 100");
+            return false;
+          }
+          sumaPorcentajes += pesoFinal;
+        }
+
+        // Validar prácticas si aplican
+        if (document.getElementById("tiene-practicas").value === "si") {
+          const pesoPracticas = parseFloat(document.getElementById("peso-practicas").value) || 0;
+          if (isNaN(pesoPracticas) || pesoPracticas < 0 || pesoPracticas > 100) {
+            alert("El peso de Prácticas debe ser entre 0 y 100");
+            return false;
+          }
+          sumaPorcentajes += pesoPracticas;
+        }
+
+        // Validar auxiliatura si aplica
+        if (document.getElementById("tiene-auxiliatura").value === "si") {
+          const pesoAuxiliatura = parseFloat(document.getElementById("peso-auxiliatura").value) || 0;
+          if (isNaN(pesoAuxiliatura) || pesoAuxiliatura < 0 || pesoAuxiliatura > 100) {
+            alert("El peso de Auxiliatura debe ser entre 0 y 100");
+            return false;
+          }
+          sumaPorcentajes += pesoAuxiliatura;
+        }
+
+        // Validar suma total
+        if (sumaPorcentajes !== 100) {
+          alert(`Error: La suma de porcentajes debe ser 100% (actual: ${sumaPorcentajes}%)`);
+          return false;
+        }
+
+        return true;
+      }
+
+      // Función principal de cálculo
+
       function calcularNotaNecesaria() {
         const numParciales = parseInt(document.getElementById("num-parciales").value);
         const tieneFinal = document.getElementById("tiene-final").value;
@@ -1333,113 +1390,102 @@
         const tieneAuxiliatura = document.getElementById("tiene-auxiliatura").value === "si";
         const notaMinima = parseFloat(document.getElementById("nota-minima").value);
 
-        // Calcular pesos
-        let pesoParciales = 0;
-        let pesoFinal = 0;
-        let pesoPracticas = 0;
-        let pesoAuxiliatura = 0;
-
-        // Obtener pesos de parciales
-        const pesosParciales = [];
-        for (let i = 1; i <= numParciales; i++) {
-          const peso = parseFloat(document.getElementById(`peso-parcial-${i}`).value);
-          pesosParciales.push(peso);
-          pesoParciales += peso;
-        }
-
-        if (tieneFinal !== "no") {
-          pesoFinal = parseFloat(document.getElementById("peso-final").value);
-        }
-
-        if (tienePracticas) {
-          pesoPracticas = parseFloat(document.getElementById("peso-practicas").value);
-        }
-
-        if (tieneAuxiliatura) {
-          pesoAuxiliatura = parseFloat(document.getElementById("peso-auxiliatura").value);
-        }
-
-        // Validar que la suma de pesos sea 100%
-        const sumaPesos = pesoParciales + pesoFinal + pesoPracticas + pesoAuxiliatura;
-        if (sumaPesos !== 100) {
-          resultadosNotas.innerHTML = `
-        <div class="alert alert-danger">
-          Error: La suma de los porcentajes debe ser 100% (actual: ${sumaPesos}%)
-        </div>
-      `;
-          return;
-        }
-
-        // Obtener notas ingresadas
+        // Obtener notas y pesos
         const notasParciales = [];
+        const pesosParciales = [];
+        let pesoParcialesTotal = 0;
+
         for (let i = 1; i <= numParciales; i++) {
           const nota = document.getElementById(`nota-parcial-${i}`).value;
+          const peso = parseFloat(document.getElementById(`peso-parcial-${i}`).value);
           notasParciales.push(nota ? parseFloat(nota) : null);
+          pesosParciales.push(peso);
+          pesoParcialesTotal += peso;
         }
 
-        const notaPracticas = tienePracticas && document.getElementById("nota-practicas").value ?
-          parseFloat(document.getElementById("nota-practicas").value) : null;
+        // Procesar nota final
+        let notaFinal = null;
+        let pesoFinal = 0;
+        if (tieneFinal !== "no") {
+          pesoFinal = parseFloat(document.getElementById("peso-final").value);
+          notaFinal = document.getElementById("nota-final").value ?
+            parseFloat(document.getElementById("nota-final").value) : null;
+        }
 
-        const notaAuxiliatura = tieneAuxiliatura && document.getElementById("nota-auxiliatura").value ?
-          parseFloat(document.getElementById("nota-auxiliatura").value) : null;
+        // Procesar recuperatorio
+        if (tieneFinal === "recuperatorio" && notaFinal !== null) {
+          const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value) - 1;
+          if (notasParciales[parcialARecuperar] !== null) {
+            notasParciales[parcialARecuperar] = Math.max(notasParciales[parcialARecuperar], notaFinal);
+          } else {
+            notasParciales[parcialARecuperar] = notaFinal;
+          }
+        }
 
-        // Calcular nota actual y necesaria
+        // Calcular nota actual
         let notaActual = 0;
-        let notaNecesaria = 0;
         let detalle = "<h6>Detalle de Cálculo</h6><ul>";
-        let pesoRestante = 100;
 
-        // Calcular contribución de parciales
+        // Sumar parciales
         for (let i = 0; i < numParciales; i++) {
           if (notasParciales[i] !== null) {
             const contribucion = notasParciales[i] * pesosParciales[i] / 100;
             notaActual += contribucion;
-            pesoRestante -= pesosParciales[i];
             detalle += `<li>Parcial ${i + 1}: ${notasParciales[i]} (${pesosParciales[i]}%) → ${contribucion.toFixed(2)}</li>`;
           }
         }
 
-        // Manejar recuperatorio
-        if (tieneFinal === "recuperatorio") {
-          const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value) - 1;
-          if (notasParciales[parcialARecuperar] !== null) {
-            detalle += `<li>El final reemplaza al Parcial ${parcialARecuperar + 1}</li>`;
+        // Sumar final si es evaluación independiente
+        if (tieneFinal === "si" && notaFinal !== null) {
+          const contribucion = notaFinal * pesoFinal / 100;
+          notaActual += contribucion;
+          detalle += `<li>Final: ${notaFinal} (${pesoFinal}%) → ${contribucion.toFixed(2)}</li>`;
+        }
+
+        // Sumar prácticas si aplica
+        let notaPracticas = null;
+        let pesoPracticas = 0;
+        if (tienePracticas) {
+          pesoPracticas = parseFloat(document.getElementById("peso-practicas").value);
+          notaPracticas = document.getElementById("nota-practicas").value ?
+            parseFloat(document.getElementById("nota-practicas").value) : null;
+
+          if (notaPracticas !== null) {
+            const contribucion = notaPracticas * pesoPracticas / 100;
+            notaActual += contribucion;
+            detalle += `<li>Prácticas: ${notaPracticas} (${pesoPracticas}%) → ${contribucion.toFixed(2)}</li>`;
           }
         }
 
-        // Calcular contribución de prácticas
-        if (tienePracticas && notaPracticas !== null) {
-          const contribucion = notaPracticas * pesoPracticas / 100;
-          notaActual += contribucion;
-          pesoRestante -= pesoPracticas;
-          detalle += `<li>Prácticas: ${notaPracticas} (${pesoPracticas}%) → ${contribucion.toFixed(2)}</li>`;
+        // Sumar auxiliatura si aplica
+        let notaAuxiliatura = null;
+        let pesoAuxiliatura = 0;
+        if (tieneAuxiliatura) {
+          pesoAuxiliatura = parseFloat(document.getElementById("peso-auxiliatura").value);
+          notaAuxiliatura = document.getElementById("nota-auxiliatura").value ?
+            parseFloat(document.getElementById("nota-auxiliatura").value) : null;
+
+          if (notaAuxiliatura !== null) {
+            const contribucion = notaAuxiliatura * pesoAuxiliatura / 100;
+            notaActual += contribucion;
+            detalle += `<li>Auxiliatura: ${notaAuxiliatura} (${pesoAuxiliatura}%) → ${contribucion.toFixed(2)}</li>`;
+          }
         }
 
-        // Calcular contribución de auxiliatura
-        if (tieneAuxiliatura && notaAuxiliatura !== null) {
-          const contribucion = notaAuxiliatura * pesoAuxiliatura / 100;
-          notaActual += contribucion;
-          pesoRestante -= pesoAuxiliatura;
-          detalle += `<li>Auxiliatura: ${notaAuxiliatura} (${pesoAuxiliatura}%) → ${contribucion.toFixed(2)}</li>`;
-        }
+        // Calcular peso restante y nota necesaria
+        const pesoTotalAsignado = pesoParcialesTotal +
+          (tieneFinal === "si" ? pesoFinal : 0) +
+          (tienePracticas ? pesoPracticas : 0) +
+          (tieneAuxiliatura ? pesoAuxiliatura : 0);
 
-        // Calcular nota necesaria en los componentes restantes
+        const pesoRestante = 100 - pesoTotalAsignado;
+        let notaNecesaria = 0;
+
         if (pesoRestante > 0) {
           notaNecesaria = (notaMinima - notaActual) * 100 / pesoRestante;
-          notaNecesaria = Math.max(0, Math.min(100, notaNecesaria)); // Asegurar entre 0 y 100
-
-          detalle += `<li>Nota actual: ${notaActual.toFixed(2)}</li>`;
-
-          if (tieneFinal === "recuperatorio") {
-            const parcialARecuperar = parseInt(document.getElementById("parcial-recupera").value);
-            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el final (recupera Parcial ${parcialARecuperar}) para alcanzar ${notaMinima}</li>`;
-          } else if (tieneFinal === "si") {
-            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el final (${pesoFinal}%) para alcanzar ${notaMinima}</li>`;
-          } else {
-            detalle += `<li>Necesitas ${notaNecesaria.toFixed(2)} en el resto (${pesoRestante}%) para alcanzar ${notaMinima}</li>`;
-          }
+          notaNecesaria = Math.max(0, Math.min(100, notaNecesaria));
+          detalle += `<li>Faltan asignar ${pesoRestante}% (${tieneFinal === "recuperatorio" ? "Final recuperatorio" : "Evaluaciones restantes"})</li>`;
         } else {
-          notaNecesaria = 0;
           detalle += `<li>Nota final: ${notaActual.toFixed(2)}</li>`;
         }
 
@@ -1484,13 +1530,22 @@
         resultadosNotas.innerHTML = resultadoHTML;
         detalleCalculadora.innerHTML = detalle;
       }
-    }
 
-    // Activar calculadora cuando se selecciona una carrera
+      // Configurar evento del botón calcular
+      btnCalcularNota.addEventListener("click", function () {
+        if (!validarCampos()) return;
+        calcularNotaNecesaria();
+      });
+
+      // Generar campos iniciales
+      generarCamposParciales(2);
+
+    }
     carreraSelect.addEventListener("change", () => {
       document.getElementById("calculadora-notas").style.display = "block";
       setupCalculadoraNotas();
     });
+
   </script>
 </body>
 
