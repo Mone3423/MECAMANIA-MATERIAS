@@ -99,7 +99,7 @@
       margin-bottom: 1rem;
     }
 
-    
+
 
     @media (max-width: 768px) {
       .logo {
@@ -332,7 +332,7 @@
       </div>
 
     </section>
-    <!-- Seccion Calculadora de notas-->
+    <!-- Sección Calculadora de Notas -->
     <section id="calculadora-notas" class="mt-5" style="display: none;">
       <h2>Calculadora de Notas</h2>
       <div class="alert alert-info">
@@ -355,7 +355,86 @@
               </div>
 
               <div id="config-evaluacion-container">
-                <!-- Se generará dinámicamente -->
+                <!-- Configuración básica -->
+                <div class="mb-3">
+                  <label class="form-label">Número de Parciales</label>
+                  <input type="number" id="num-parciales" class="form-control" min="1" max="4" value="2">
+                </div>
+
+                <div id="parciales-container">
+                  <!-- Parciales se generarán aquí -->
+                </div>
+
+                <!-- Configuración de Final -->
+                <div class="mb-3">
+                  <label class="form-label">¿Incluye Examen Final?</label>
+                  <select id="tiene-final" class="form-select">
+                    <option value="no" selected>No</option>
+                    <option value="si">Sí</option>
+                    <option value="recuperatorio">Es recuperatorio</option>
+                  </select>
+                </div>
+
+                <div id="final-container" style="display: none;">
+                  <div class="mb-3">
+                    <label class="form-label">Peso Examen Final (%)</label>
+                    <input type="number" id="peso-final" class="form-control" min="0" max="100" value="30">
+                  </div>
+                  <div class="mb-3" id="recuperatorio-container" style="display: none;">
+                    <label class="form-label">¿Recupera qué parcial?</label>
+                    <select id="parcial-recupera" class="form-select">
+                      <!-- Se llenará dinámicamente -->
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Configuración de Prácticas -->
+                <div class="mb-3">
+                  <label class="form-label">¿Incluye Prácticas?</label>
+                  <select id="tiene-practicas" class="form-select">
+                    <option value="no" selected>No</option>
+                    <option value="si">Sí</option>
+                  </select>
+                </div>
+
+                <div id="practicas-container" style="display: none;">
+                  <div class="mb-3">
+                    <label class="form-label">Peso Prácticas (%)</label>
+                    <input type="number" id="peso-practicas" class="form-control" min="0" max="100" value="20">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Nota Prácticas (opcional)</label>
+                    <input type="number" id="nota-practicas" class="form-control" min="0" max="100"
+                      placeholder="Dejar vacío si no presentado">
+                  </div>
+                </div>
+
+                <!-- Configuración de Auxiliatura -->
+                <div class="mb-3">
+                  <label class="form-label">¿Incluye Auxiliatura?</label>
+                  <select id="tiene-auxiliatura" class="form-select">
+                    <option value="no" selected>No</option>
+                    <option value="si">Sí</option>
+                  </select>
+                </div>
+
+                <div id="auxiliatura-container" style="display: none;">
+                  <div class="mb-3">
+                    <label class="form-label">Peso Auxiliatura (%)</label>
+                    <input type="number" id="peso-auxiliatura" class="form-control" min="0" max="100" value="10">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Nota Auxiliatura (opcional)</label>
+                    <input type="number" id="nota-auxiliatura" class="form-control" min="0" max="100"
+                      placeholder="Dejar vacío si no presentado">
+                  </div>
+                </div>
+
+                <!-- Nota mínima para aprobar -->
+                <div class="mb-3">
+                  <label class="form-label">Nota Mínima para Aprobar</label>
+                  <input type="number" id="nota-minima" class="form-control" min="0" max="100" value="60">
+                </div>
               </div>
 
               <button id="btn-calcular-nota" class="btn btn-primary mt-3">
@@ -1171,13 +1250,7 @@
     // Hacer funciones accesibles globalmente para los botones
     window.toggleAllMaterias = toggleAllMaterias;
     window.handleMateriaCheckboxChange = handleMateriaCheckboxChange;
-    // Mostrar/ocultar sección de notas cuando se selecciona una carrera
-    carreraSelect.addEventListener("change", () => {
-      // ... (código existente)
-      document.getElementById("calculadora-notas").style.display = "block";
-      setupCalculadoraNotas();
-    });
-
+    // Función para configurar la calculadora de notas
     function setupCalculadoraNotas() {
       const materiaNotasSelect = document.getElementById("materia-notas-select");
       const configEvaluacionContainer = document.getElementById("config-evaluacion-container");
@@ -1189,122 +1262,39 @@
       materiaNotasSelect.innerHTML = '<option value="" disabled selected>Elige una materia</option>' +
         materias.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
 
-      materiaNotasSelect.addEventListener("change", function () {
-        const materiaId = this.value;
-        if (!materiaId) return;
+      // Event listeners para mostrar/ocultar secciones
+      document.getElementById("tiene-final").addEventListener("change", function () {
+        const finalContainer = document.getElementById("final-container");
+        finalContainer.style.display = this.value === "no" ? "none" : "block";
 
-        // Configuración inicial
-        configEvaluacionContainer.innerHTML = `
-            <!-- Actualiza la sección de configuración en el HTML -->
-        <div id="config-evaluacion-container">
-          <h6 class="mt-3">Configuración de Evaluación</h6>
-          <div class="mb-3">
-            <label class="form-label">Número de Parciales</label>
-            <input type="number" id="num-parciales" class="form-control" min="1" max="4" value="2">
-          </div>
-          
-          <div id="parciales-container">
-            <!-- Se generarán los campos para cada parcial -->
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">¿Incluye Examen Final?</label>
-            <select id="tiene-final" class="form-select">
-              <option value="no" selected>No</option>
-              <option value="si">Sí</option>
-              <option value="recuperatorio">Es recuperatorio</option>
-            </select>
-          </div>
-          
-          <div id="final-container" style="display: none;">
-            <div class="mb-3">
-              <label class="form-label">Peso Examen Final (%)</label>
-              <input type="number" id="peso-final" class="form-control" min="0" max="100" value="30">
-            </div>
-            <div class="mb-3" id="recuperatorio-container" style="display: none;">
-              <label class="form-label">¿Recupera qué parcial?</label>
-              <select id="parcial-recupera" class="form-select">
-                <!-- Se llenará dinámicamente -->
-              </select>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">¿Incluye Prácticas?</label>
-            <select id="tiene-practicas" class="form-select">
-              <option value="no" selected>No</option>
-              <option value="si">Sí</option>
-            </select>
-          </div>
-          
-          <div id="practicas-container" style="display: none;">
-            <div class="mb-3">
-              <label class="form-label">Peso Prácticas (%)</label>
-              <input type="number" id="peso-practicas" class="form-control" min="0" max="100" value="20">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nota Prácticas (opcional)</label>
-              <input type="number" id="nota-practicas" class="form-control" min="0" max="100" placeholder="Dejar vacío si no presentado">
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">¿Incluye Auxiliatura?</label>
-            <select id="tiene-auxiliatura" class="form-select">
-              <option value="no" selected>No</option>
-              <option value="si">Sí</option>
-            </select>
-          </div>
-          
-          <div id="auxiliatura-container" style="display: none;">
-            <div class="mb-3">
-              <label class="form-label">Peso Auxiliatura (%)</label>
-              <input type="number" id="peso-auxiliatura" class="form-control" min="0" max="100" value="10">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nota Auxiliatura (opcional)</label>
-              <input type="number" id="nota-auxiliatura" class="form-control" min="0" max="100" placeholder="Dejar vacío si no presentado">
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">Nota Mínima para Aprobar</label>
-            <input type="number" id="nota-minima" class="form-control" min="0" max="100" value="60">
-          </div>
-        </div>
-            `;
+        const recuperatorioContainer = document.getElementById("recuperatorio-container");
+        recuperatorioContainer.style.display = this.value === "recuperatorio" ? "block" : "none";
 
-        // Event listeners para mostrar/ocultar secciones
-        document.getElementById("tiene-final").addEventListener("change", function () {
-          const finalContainer = document.getElementById("final-container");
-          finalContainer.style.display = this.value === "no" ? "none" : "block";
-
-          const recuperatorioContainer = document.getElementById("recuperatorio-container");
-          recuperatorioContainer.style.display = this.value === "recuperatorio" ? "block" : "none";
-
-          if (this.value === "recuperatorio") {
-            actualizarOpcionesRecuperatorio();
-          }
-        });
-
-        document.getElementById("tiene-practicas").addEventListener("change", function () {
-          document.getElementById("practicas-container").style.display = this.value === "si" ? "block" : "none";
-        });
-
-        document.getElementById("tiene-auxiliatura").addEventListener("change", function () {
-          document.getElementById("auxiliatura-container").style.display = this.value === "si" ? "block" : "none";
-        });
-
-        document.getElementById("num-parciales").addEventListener("change", function () {
-          generarCamposParciales(parseInt(this.value));
-          if (document.getElementById("tiene-final").value === "recuperatorio") {
-            actualizarOpcionesRecuperatorio();
-          }
-        });
-
-        // Generar campos iniciales
-        generarCamposParciales(2);
+        if (this.value === "recuperatorio") {
+          actualizarOpcionesRecuperatorio();
+        }
       });
+
+      document.getElementById("tiene-practicas").addEventListener("change", function () {
+        document.getElementById("practicas-container").style.display = this.value === "si" ? "block" : "none";
+      });
+
+      document.getElementById("tiene-auxiliatura").addEventListener("change", function () {
+        document.getElementById("auxiliatura-container").style.display = this.value === "si" ? "block" : "none";
+      });
+
+      document.getElementById("num-parciales").addEventListener("change", function () {
+        generarCamposParciales(parseInt(this.value));
+        if (document.getElementById("tiene-final").value === "recuperatorio") {
+          actualizarOpcionesRecuperatorio();
+        }
+      });
+
+      // Generar campos iniciales
+      generarCamposParciales(2);
+
+      // Configurar evento para calcular notas
+      btnCalcularNota.addEventListener("click", calcularNotaNecesaria);
 
       function actualizarOpcionesRecuperatorio() {
         const numParciales = parseInt(document.getElementById("num-parciales").value);
@@ -1496,6 +1486,11 @@
       }
     }
 
+    // Activar calculadora cuando se selecciona una carrera
+    carreraSelect.addEventListener("change", () => {
+      document.getElementById("calculadora-notas").style.display = "block";
+      setupCalculadoraNotas();
+    });
   </script>
 </body>
 
